@@ -1,7 +1,6 @@
 import jsonServerProvider from "ra-data-json-server";
-import { Admin, ListGuesser, Resource } from "react-admin";
+import { Admin, ListGuesser, Resource, defaultTheme } from "react-admin";
 const dataProvider = jsonServerProvider("https://jsonplaceholder.typicode.com");
-import { defaultTheme } from "react-admin";
 
 const theme = {
   ...defaultTheme,

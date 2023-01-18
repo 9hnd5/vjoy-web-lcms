@@ -3,6 +3,12 @@ const { merge } = require("webpack-merge");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
+const ESLintPlugin = require("eslint-webpack-plugin");
+
+const handler = (percentage, message, ...args) => {
+  // e.g. Output each progress message directly to the console:
+  console.info(percentage, message, ...args);
+};
 
 //Get config base on env build
 function getEnvConfig(env) {
@@ -23,7 +29,9 @@ module.exports = ({ env }) => {
       extensions: [".tsx", ".ts", ".js"],
       modules: [path.join(__dirname, "src"), "node_modules"],
     },
-
+    performance: {
+      hints: false,
+    },
     module: {
       rules: [
         //Loader for typescript(.tsx)
@@ -50,7 +58,11 @@ module.exports = ({ env }) => {
     },
 
     plugins: [
-      new ForkTsCheckerWebpackPlugin(),
+      new ESLintPlugin({
+        files: ["src/**/*"],
+        extensions: ["ts, tsx"],
+      }),
+      new ForkTsCheckerWebpackPlugin({}),
       new webpack.DefinePlugin({
         ENV: JSON.stringify(envVars),
       }),
@@ -59,6 +71,7 @@ module.exports = ({ env }) => {
         favicon: path.join(__dirname, "./src/assets/favicon.ico"),
         title: "LCMS",
       }),
+      new webpack.ProgressPlugin(handler),
     ],
   };
 
