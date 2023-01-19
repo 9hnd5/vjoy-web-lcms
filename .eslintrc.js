@@ -27,6 +27,7 @@ module.exports = {
     "src/assets",
     "src/*.css",
     "src/*.html",
+    "eslint*",
   ],
   extends: [
     "eslint:recommended", //eslint-plugin-import

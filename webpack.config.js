@@ -4,6 +4,7 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 const ESLintPlugin = require("eslint-webpack-plugin");
+const ESLintThreadWebpackPlugin = require("./eslint-thread-webpack-plugin");
 
 const handler = (percentage, message, ...args) => {
   // e.g. Output each progress message directly to the console:
@@ -14,13 +15,15 @@ const handler = (percentage, message, ...args) => {
 function getEnvConfig(env) {
   if (env === "prod" || env === "dev") {
     return require(path.join(__dirname, `./webpack.${env}.js`));
+  } else {
+    return require(path.join(__dirname, `./webpack.prod.js`));
   }
 }
 
 module.exports = ({ env }) => {
   const envConfig = getEnvConfig(env);
 
-  const envVars = require(`./env.${env}`);
+  const envVars = require(`./env/${env}`);
 
   const commonConfig = {
     entry: path.join(__dirname, "./src/index.tsx"),
@@ -58,11 +61,12 @@ module.exports = ({ env }) => {
     },
 
     plugins: [
-      new ESLintPlugin({
-        files: ["src/**/*"],
-        extensions: ["ts, tsx"],
-      }),
+      // new ESLintPlugin({
+      //   files: ["src/**/*"],
+      //   extensions: ["ts, tsx"],
+      // }),
       new ForkTsCheckerWebpackPlugin({}),
+      new ESLintThreadWebpackPlugin(),
       new webpack.DefinePlugin({
         ENV: JSON.stringify(envVars),
       }),
@@ -71,7 +75,7 @@ module.exports = ({ env }) => {
         favicon: path.join(__dirname, "./src/assets/favicon.ico"),
         title: "LCMS",
       }),
-      new webpack.ProgressPlugin(handler),
+      // new webpack.ProgressPlugin(handler),
     ],
   };
 

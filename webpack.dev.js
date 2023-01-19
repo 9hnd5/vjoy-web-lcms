@@ -4,7 +4,7 @@ module.exports = {
   mode: "development",
   devServer: {
     hot: true,
-    open: true,
+    // open: true,
     compress: true,
     static: {
       directory: path.join(__dirname, "dist"),
@@ -14,7 +14,7 @@ module.exports = {
     historyApiFallback: true,
     client: {
       progress: true,
-      overlay: true,
+      overlay: false,
       logging: "info",
     },
   },
