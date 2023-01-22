@@ -4,9 +4,6 @@ import { HttpError } from "react-admin";
 const { stringify } = qs;
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-console.log("url", apiUrl);
-console.log("env", process.env.NODE_ENV);
-console.log("env1", process.env);
 
 axios.interceptors.response.use(
   function (response) {

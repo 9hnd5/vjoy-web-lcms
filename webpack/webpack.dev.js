@@ -4,17 +4,13 @@ module.exports = {
   mode: "development",
   devServer: {
     hot: true,
-    // open: true,
+    open: true,
     compress: true,
-    static: {
-      directory: path.join(__dirname, "dist"),
-      publicPath: "http://localhost:3000",
-    },
     port: 3000,
     historyApiFallback: true,
     client: {
       progress: true,
-      overlay: false,
+      overlay: true,
       logging: "info",
     },
   },
@@ -29,8 +25,8 @@ module.exports = {
   },
   plugins: [],
   output: {
-    path: path.join(__dirname, "./dist"),
+    path: path.join(process.cwd(), "./dist"),
     filename: "main.js",
-    clean: true,
+    assetModuleFilename: "assets/[hash][ext][query]",
   },
 };

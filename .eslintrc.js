@@ -22,7 +22,7 @@ module.exports = {
   },
   ignorePatterns: [
     ".eslintrc.js",
-    "webpack.*",
+    "webpack/",
     "env.*",
     "src/assets",
     "src/*.css",

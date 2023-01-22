@@ -59,8 +59,8 @@ module.exports = {
     }),
   ],
   output: {
-    path: path.join(__dirname, "./dist"),
+    path: path.join(process.cwd(), "./dist"),
     filename: "[id].[name].[contenthash].js",
-    clean: true,
+    assetModuleFilename: "assets/[hash][ext][query]",
   },
 };

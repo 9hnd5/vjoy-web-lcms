@@ -1,15 +1,9 @@
 const path = require("path");
 const { merge } = require("webpack-merge");
+const webpack = require("webpack");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const webpack = require("webpack");
-const ESLintPlugin = require("eslint-webpack-plugin");
-const ESLintThreadWebpackPlugin = require("./eslint-thread-webpack-plugin");
-
-const handler = (percentage, message, ...args) => {
-  // e.g. Output each progress message directly to the console:
-  console.info(percentage, message, ...args);
-};
+const ESLintThreadWebpackPlugin = require("./plugins/eslint-thread-webpack-plugin");
 
 //Get config base on env build
 function getEnvConfig(env) {
@@ -23,14 +17,14 @@ function getEnvConfig(env) {
 module.exports = ({ env }) => {
   const envConfig = getEnvConfig(env);
 
-  const envVars = require(`./env/${env}`);
+  const envVars = require(path.join(process.cwd(), `env/${env}`));
 
   const commonConfig = {
-    entry: path.join(__dirname, "./src/index.tsx"),
+    entry: path.join(process.cwd(), "src/index.tsx"),
 
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
-      modules: [path.join(__dirname, "src"), "node_modules"],
+      modules: [path.join(process.cwd(), "src"), "node_modules"],
     },
     performance: {
       hints: false,
@@ -49,7 +43,7 @@ module.exports = ({ env }) => {
         },
         //Loader for image, icon
         {
-          test: /\.(png|svg|jpg|jpeg|gif)$/i,
+          test: /\.(png|svg|jpg|jpeg|gif|ico)$/i,
           type: "asset/resource",
         },
         //Loader for font
@@ -61,21 +55,17 @@ module.exports = ({ env }) => {
     },
 
     plugins: [
-      // new ESLintPlugin({
-      //   files: ["src/**/*"],
-      //   extensions: ["ts, tsx"],
-      // }),
-      new ForkTsCheckerWebpackPlugin({}),
-      new ESLintThreadWebpackPlugin(),
       new webpack.DefinePlugin({
         ENV: JSON.stringify(envVars),
       }),
       new HtmlWebpackPlugin({
-        template: path.join(__dirname, "./src/index.html"),
-        favicon: path.join(__dirname, "./src/assets/favicon.ico"),
+        template: path.join(process.cwd(), "src/index.html"),
+        favicon: path.join(process.cwd(), "src/assets/favicon.ico"),
         title: "LCMS",
       }),
-      // new webpack.ProgressPlugin(handler),
+      new ForkTsCheckerWebpackPlugin(),
+      new ESLintThreadWebpackPlugin(),
+      new webpack.ProgressPlugin({ profile: true }),
     ],
   };
 
