@@ -3,7 +3,7 @@ import qs from "query-string";
 import { HttpError } from "react-admin";
 const { stringify } = qs;
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = ENV.API_URL;
 
 axios.interceptors.response.use(
   function (response) {

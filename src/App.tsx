@@ -1,6 +1,5 @@
-import jsonServerProvider from "ra-data-json-server";
 import { Admin, defaultTheme, ListGuesser, Resource } from "react-admin";
-const dataProvider = jsonServerProvider("https://jsonplaceholder.typicode.com");
+import dataService from "services/dataService";
 const theme = {
   ...defaultTheme,
   typography: {
@@ -10,13 +9,7 @@ const theme = {
   },
 };
 const App = () => {
-  console.log(ENV.API_URL);
-  return (
-    <Admin dataProvider={dataProvider} theme={theme}>
-      <Resource name="posts" list={ListGuesser} />
-      <Resource name="comments" list={ListGuesser} />
-    </Admin>
-  );
+  return <Admin dataProvider={dataService} theme={theme}></Admin>;
 };
 
 export default App;
