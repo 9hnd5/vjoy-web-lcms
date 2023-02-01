@@ -1,15 +1,18 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import {
+  AutocompleteArrayInput,
   Create,
   DateInput,
   email,
   maxLength,
   RadioButtonGroupInput,
+  regex,
   required,
   SimpleForm,
   TextInput,
 } from "react-admin";
+import { regexPhoneNumber } from "ultils/constants";
 
 export const UserCreate = () => {
   return (
@@ -45,6 +48,21 @@ export const UserCreate = () => {
           label="Email"
           fullWidth
           validate={[email(), required()]}
+        />
+        <TextInput
+          source="phone"
+          label="Phone"
+          fullWidth
+          validate={[regex(regexPhoneNumber, "Not VN phone number format")]}
+        />
+        <AutocompleteArrayInput source="roles" label="Roles" choices={[
+            { id: 'admin', name: 'Admin' },
+            { id: 'u001', name: 'Editor' },
+            { id: 'u002', name: 'Moderator' },
+            { id: 'u003', name: 'Reviewer' },
+          ]} 
+          fullWidth
+          validate={[required()]}
         />
         <RadioButtonGroupInput
           source="gender"
