@@ -3,6 +3,7 @@ import {
   Create,
   email,
   maxLength,
+  RadioButtonGroupInput,
   required,
   SelectInput,
   SimpleForm,
@@ -52,8 +53,8 @@ export const UserCreate = () => {
           fullWidth
           validate={[required()]}
         />
-        <SelectInput
-          source="status"
+        <RadioButtonGroupInput
+          source="gender"
           choices={[
             { id: 0, name: "NEW" },
             { id: 1, name: "ACTIVATED" },
