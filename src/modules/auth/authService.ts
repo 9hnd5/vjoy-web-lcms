@@ -1,18 +1,23 @@
+const fakeUser = {
+  id: 1,
+  fullName: "Nguyễn Đình Huy",
+  token: "fakeToken",
+  refreshToken: "fakeRefreshToken",
+};
 export const authService = {
   login: (params: any) => {
-    const { username, password } = params;
-    if (username !== "test" && password !== "test") {
-      return Promise.reject();
+    const { email, password } = params;
+    if (email === "admin@gmail.com" && password === "admin") {
+      localStorage.setItem("user", JSON.stringify(fakeUser));
+      return Promise.resolve();
     }
-    localStorage.setItem("username", username);
-    return Promise.resolve();
+    return Promise.reject("Invalid Credential");
   },
   logout: () => {
-    localStorage.removeItem("username");
+    localStorage.removeItem("user");
     return Promise.resolve();
   },
-  checkAuth: () =>
-    localStorage.getItem("username") ? Promise.resolve() : Promise.reject(),
+  checkAuth: () => (localStorage.getItem("user") ? Promise.resolve() : Promise.reject()),
   checkError: (error: any) => {
     const status = error.status;
     if (status === 401 || status === 403) {
@@ -20,10 +25,11 @@ export const authService = {
     }
     return Promise.resolve();
   },
-  getIdentity: () =>
-    Promise.resolve({
-      id: 1,
-      fullName: "Huy Nguyễn",
-    }),
+  getIdentity: () => {
+    const user = localStorage.getItem("user");
+    if (!user) return Promise.reject();
+    return Promise.resolve(JSON.parse(user));
+  },
+
   getPermissions: () => Promise.resolve(""),
 };
