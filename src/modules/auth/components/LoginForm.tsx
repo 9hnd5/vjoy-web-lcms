@@ -12,14 +12,9 @@ export const LoginForm = () => {
     try {
       setIsLoading(true);
       await login(formData);
-    } catch (error) {
-      if (typeof error === "string") {
-        notify(error, { type: "error" });
-      } else {
-        notify(JSON.stringify(error), { type: "error" });
-      }
-    } finally {
+    } catch (err: any) {
       setIsLoading(false);
+      notify(err?.message, { type: "error" });
     }
   };
 
