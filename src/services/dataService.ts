@@ -1,34 +1,35 @@
 import axios from "axios";
 import qs from "query-string";
 import { HttpError } from "react-admin";
+import { LOCAL_STORAGE_KEY } from "ultils/constants";
 const { stringify } = qs;
-
+const dataServiceAxios = axios.create();
 const apiUrl = ENV.API_URL;
 
-axios.interceptors.response.use(
+dataServiceAxios.interceptors.response.use(
   function (response) {
-    return response;
+    return response.data;
   },
   function (err) {
-    if (err.response) {
-      const { response } = err;
-      return Promise.reject(
-        new HttpError(response.data.message, response.status, response.data)
-      );
-    } else if (err.request) {
-      const { status, response } = err.request;
-      return Promise.reject(
-        new HttpError("Network Error", status, JSON.stringify(response))
-      );
-    } else {
-      return Promise.reject(new HttpError("Internal Error", 500, err.message));
-    }
+    if (!err.response) return Promise.reject(err);
+    const {
+      response: {
+        data: { error },
+        status,
+      },
+    } = err;
+    if (typeof error === "string") return Promise.reject(new HttpError(error, status));
+    if (Array.isArray(error)) return Promise.reject(new HttpError("Error", status, error));
+    return Promise.reject(new HttpError(error.message, status));
   }
 );
 
-axios.interceptors.request.use(function (config) {
-  const userSession = localStorage.getItem("userSession"); // Must do
-  config.headers.authorization = "Bearer ";
+dataServiceAxios.interceptors.request.use(function (config) {
+  const user = localStorage.getItem(LOCAL_STORAGE_KEY.USER);
+  if (!user) return config;
+
+  const parseUser = JSON.parse(user);
+  config.headers.authorization = `Bearer ${parseUser.accessToken}`;
   return config;
 });
 
@@ -42,13 +43,13 @@ const dataService = {
       filter: JSON.stringify(params.filter),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await axios.get(url);
+    const { data } = await dataServiceAxios.get(url);
     return data;
   },
 
   getOne: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await axios.get(url);
+    const { data } = await dataServiceAxios.get(url);
     return data;
   },
 
@@ -57,7 +58,7 @@ const dataService = {
       filter: JSON.stringify({ ids: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await axios.get(url);
+    const { data } = await dataServiceAxios.get(url);
     return data;
   },
 
@@ -73,19 +74,19 @@ const dataService = {
       }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await axios.get(url);
+    const { data } = await dataServiceAxios.get(url);
     return data;
   },
 
   create: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}`;
-    const { data } = await axios.post(url, params.data);
+    const { data } = await dataServiceAxios.post(url, params.data);
     return data;
   },
 
   update: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await axios.put(url, params.data);
+    const { data } = await dataServiceAxios.put(url, params.data);
     return data;
   },
 
@@ -94,13 +95,13 @@ const dataService = {
       ids: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await axios.put(url, params.data);
+    const { data } = await dataServiceAxios.put(url, params.data);
     return data;
   },
 
   delete: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await axios.delete(url);
+    const { data } = await dataServiceAxios.delete(url);
     return data;
   },
 
@@ -109,7 +110,7 @@ const dataService = {
       ids: JSON.stringify(params.ids),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await axios.delete(url);
+    const { data } = await dataServiceAxios.delete(url);
     return data;
   },
 };
