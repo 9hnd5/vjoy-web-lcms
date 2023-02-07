@@ -7,12 +7,12 @@ import {
   FunctionField,
   List,
   TextField,
-  TextInput,
   TopToolbar,
   SelectField,
+  SearchInput,
 } from "react-admin";
 
-const listFilters = [<TextInput label="Search" key="search" source="q" alwaysOn />];
+const listFilters = [<SearchInput key="search" source="q" alwaysOn />];
 
 const ListActions = () => (
   <TopToolbar>
