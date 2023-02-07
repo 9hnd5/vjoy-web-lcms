@@ -44,12 +44,12 @@ const dataService = {
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     const { data } = await dataServiceAxios.get(url);
-    return data;
+    return { data: data.rows, total: data.count };
   },
 
   getOne: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await dataServiceAxios.get(url);
+    const data = await dataServiceAxios.get(url);
     return data;
   },
 
@@ -58,7 +58,7 @@ const dataService = {
       filter: JSON.stringify({ ids: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await dataServiceAxios.get(url);
+    const data = await dataServiceAxios.get(url);
     return data;
   },
 
@@ -80,13 +80,13 @@ const dataService = {
 
   create: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}`;
-    const { data } = await dataServiceAxios.post(url, params.data);
+    const data = await dataServiceAxios.post(url, params.data);
     return data;
   },
 
   update: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await dataServiceAxios.put(url, params.data);
+    const data = await dataServiceAxios.patch(url, params.data);
     return data;
   },
 
@@ -95,13 +95,13 @@ const dataService = {
       ids: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await dataServiceAxios.put(url, params.data);
+    const data = await dataServiceAxios.patch(url, params.data);
     return data;
   },
 
   delete: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await dataServiceAxios.delete(url);
+    const data = await dataServiceAxios.delete(url);
     return data;
   },
 
@@ -110,7 +110,7 @@ const dataService = {
       ids: JSON.stringify(params.ids),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await dataServiceAxios.delete(url);
+    const data = await dataServiceAxios.delete(url);
     return data;
   },
 };
