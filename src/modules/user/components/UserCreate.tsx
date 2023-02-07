@@ -1,20 +1,20 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import {
-  AutocompleteArrayInput,
+  AutocompleteInput,
   Create,
-  DateInput,
   email,
   maxLength,
-  RadioButtonGroupInput,
-  regex,
   required,
+  SelectInput,
   SimpleForm,
   TextInput,
+  useGetList,
 } from "react-admin";
-import { regexPhoneNumber } from "ultils/constants";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 export const UserCreate = () => {
+  const roles = useGetList('roles');
+
   return (
     <Create>
       <SimpleForm sx={{ maxWidth: 500 }}>
@@ -22,7 +22,7 @@ export const UserCreate = () => {
         <Box display={{ xs: "block", sm: "flex", width: "100%" }}>
           <Box flex={1} mr={{ xs: 0, sm: "0.5em" }}>
             <TextInput
-              source="firstName"
+              source="firstname"
               label="First Name"
               fullWidth
               validate={[required(), maxLength(50)]}
@@ -30,47 +30,35 @@ export const UserCreate = () => {
           </Box>
           <Box flex={1} ml={{ xs: 0, sm: "0.5em" }}>
             <TextInput
-              source="lastName"
+              source="lastname"
               label="Last Name"
               fullWidth
               validate={[required(), maxLength(50)]}
             />
           </Box>
         </Box>
-        <DateInput
-          source="dateOfBirth"
-          label="Date of birth"
-          fullWidth
-          validate={[required()]}
-        />
         <TextInput
           source="email"
           label="Email"
           fullWidth
-          validate={[email(), required()]}
+          validate={[required(), email()]}
         />
         <TextInput
           source="phone"
           label="Phone"
           fullWidth
-          validate={[regex(regexPhoneNumber, "Not VN phone number format")]}
         />
-        <AutocompleteArrayInput source="roles" label="Roles" choices={[
-            { id: 'admin', name: 'Admin' },
-            { id: 'u001', name: 'Editor' },
-            { id: 'u002', name: 'Moderator' },
-            { id: 'u003', name: 'Reviewer' },
-          ]} 
+        <AutocompleteInput source="roleId" label="Role" choices={roles.data} 
           fullWidth
           validate={[required()]}
         />
-        <RadioButtonGroupInput
-          source="gender"
+        <SelectInput
+          source="status"
           choices={[
-            { id: "Male", name: "Male" },
-            { id: "Female", name: "Female" },
+            { id: 0, name: "NEW" },
+            { id: 1, name: "ACTIVATED" },
+            { id: 2, name: "DEACTIVED" },
           ]}
-          validate={[required()]}
         />
       </SimpleForm>
     </Create>
