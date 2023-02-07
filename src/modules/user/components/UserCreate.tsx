@@ -53,8 +53,8 @@ export const UserCreate = () => {
           fullWidth
           validate={[required()]}
         />
-        <RadioButtonGroupInput
-          source="gender"
+        <SelectInput
+          source="status"
           choices={[
             { id: 0, name: "NEW" },
             { id: 1, name: "ACTIVATED" },
