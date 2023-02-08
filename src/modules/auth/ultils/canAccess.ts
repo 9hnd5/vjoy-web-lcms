@@ -1,8 +1,5 @@
-type Action = "*" | "read" | "write" | "delete" | "list";
-type Permission = {
-  resource: string;
-  action: Action | Action[];
-};
+import { Action, Permission } from "../authType";
+
 type Data = {
   permissions: Permission[];
   resource: string;
