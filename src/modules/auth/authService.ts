@@ -46,5 +46,11 @@ export const authService = {
     return Promise.resolve({ id: parseUser.id, fullName: `${parseUser.firstname} ${parseUser.lastname}` });
   },
 
-  getPermissions: () => Promise.resolve(""),
+  getPermissions: () => {
+    const user = localStorage.getItem(LOCAL_STORAGE_KEY.USER);
+    if (!user) return Promise.resolve(null);
+
+    const parseUser = JSON.parse(user);
+    return Promise.resolve(parseUser.permissions);
+  },
 };
