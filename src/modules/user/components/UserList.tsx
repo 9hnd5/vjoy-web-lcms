@@ -6,24 +6,24 @@ import {
   FilterButton,
   FunctionField,
   List,
-  SelectField,
   TextField,
-  TextInput,
   TopToolbar,
+  SelectField,
+  SearchInput,
 } from "react-admin";
 
-const postFilters = [<TextInput label="Search" key="1" source="q" alwaysOn />];
+const listFilters = [<SearchInput key="search" source="q" alwaysOn />];
 
-const PostListActions = () => (
+const ListActions = () => (
   <TopToolbar>
-    <FilterButton filters={postFilters} />
+    <FilterButton filters={listFilters} />
     <CreateButton />
   </TopToolbar>
 );
 
 export const UserList = () => {
   return (
-    <List filters={postFilters} actions={<PostListActions />}>
+    <List filters={listFilters} actions={<ListActions />}>
       <Datagrid rowClick="edit">
         <TextField source="id" />
         <TextField source="firstname" />

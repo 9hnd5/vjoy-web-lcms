@@ -3965,13 +3965,6 @@ ra-core@^4.7.2:
     react-is "^17.0.2"
     react-query "^3.32.1"
 
-ra-data-fakerest@^4.7.2:
-  version "4.7.2"
-  resolved "https://registry.yarnpkg.com/ra-data-fakerest/-/ra-data-fakerest-4.7.2.tgz#99cd5979ad6a5b4713d71c71a6996b55b7f59d7e"
-  integrity sha512-I+ZCy2+Jd8V4hf24Ug+4a1waKGM/ArLkTeix/ZYDGSAMdF9tQ6lJzwuBHVrl5Snz/kI5IZgQ1Vg38l0xBTpxmg==
-  dependencies:
-    fakerest "^3.0.0"
-
 ra-i18n-polyglot@^4.7.2:
   version "4.7.2"
   resolved "https://registry.yarnpkg.com/ra-i18n-polyglot/-/ra-i18n-polyglot-4.7.2.tgz#12e3b0b8d53c58a014f12c9776954b0d9931771e"
