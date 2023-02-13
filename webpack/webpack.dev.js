@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
   mode: "development",
@@ -8,6 +9,10 @@ module.exports = {
     compress: true,
     port: 3000,
     historyApiFallback: true,
+    static: path.resolve(process.cwd(), "dist"),
+    devMiddleware: {
+      writeToDisk: false,
+    },
     client: {
       progress: true,
       overlay: true,
@@ -23,7 +28,11 @@ module.exports = {
       },
     ],
   },
-  plugins: [],
+  plugins: [
+    new webpack.DllReferencePlugin({
+      manifest: require(path.resolve(process.cwd(), "dist/vendor.manifest.json")),
+    }),
+  ],
   output: {
     path: path.join(process.cwd(), "./dist"),
     filename: "main.js",
