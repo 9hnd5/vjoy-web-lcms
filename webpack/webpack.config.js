@@ -4,6 +4,7 @@ const webpack = require("webpack");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ESLintThreadWebpackPlugin = require("./plugins/eslint-thread-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 //Get config base on env build
 function getEnvConfig(env) {
@@ -24,11 +25,14 @@ module.exports = ({ env }) => {
 
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
+      symlinks: false,
       modules: [path.join(process.cwd(), "src"), "node_modules"],
     },
+
     performance: {
       hints: false,
     },
+
     module: {
       rules: [
         //Loader for typescript(.tsx)
@@ -62,10 +66,13 @@ module.exports = ({ env }) => {
         template: path.join(process.cwd(), "src/index.html"),
         favicon: path.join(process.cwd(), "src/assets/favicon.ico"),
         title: "LCMS",
+        templateParameters: {
+          env,
+        },
       }),
       new ForkTsCheckerWebpackPlugin(),
       new ESLintThreadWebpackPlugin(),
-      new webpack.ProgressPlugin({ profile: true }),
+      new BundleAnalyzerPlugin(),
     ],
   };
 
