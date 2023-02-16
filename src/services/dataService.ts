@@ -38,9 +38,10 @@ const dataService = {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
     const query = {
-      sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
       filter: JSON.stringify(params.filter),
+      page: page,
+      pageSize: perPage,
+      sort: JSON.stringify([[field, order]]),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     const { data } = await dataServiceAxios.get(url);
@@ -66,12 +67,13 @@ const dataService = {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
     const query = {
-      sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
       filter: JSON.stringify({
         ...params.filter,
         [params.target]: params.id,
       }),
+      page: page,
+      pageSize: perPage,
+      sort: JSON.stringify([[field, order]]),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     const { data } = await dataServiceAxios.get(url);

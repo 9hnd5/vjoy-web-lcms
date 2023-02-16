@@ -1,6 +1,6 @@
 import { authService } from "modules/auth/authService";
 import { LoginPage } from "modules/auth/components/LoginPage";
-import { Admin, defaultTheme, ListGuesser, Resource } from "react-admin";
+import { Admin, defaultTheme, Resource } from "react-admin";
 import dataService from "services/dataService";
 const theme = {
   ...defaultTheme,
