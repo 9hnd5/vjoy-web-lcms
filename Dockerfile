@@ -14,8 +14,8 @@ RUN yarn build:prod
 FROM nginx:1.23-alpine AS runner
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
 ENV NODE_ENV production
 CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8080
 
 

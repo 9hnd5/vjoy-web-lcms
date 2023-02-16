@@ -4,7 +4,7 @@ import { HttpError } from "react-admin";
 import { LOCAL_STORAGE_KEY } from "ultils/constants";
 const { stringify } = qs;
 const dataServiceAxios = axios.create();
-const apiUrl = ENV.API_URL;
+const apiUrl = ENV.CORE_API_URL;
 
 dataServiceAxios.interceptors.response.use(
   function (response) {
