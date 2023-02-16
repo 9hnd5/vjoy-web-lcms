@@ -72,7 +72,7 @@ module.exports = ({ env }) => {
       }),
       new ForkTsCheckerWebpackPlugin(),
       new ESLintThreadWebpackPlugin(),
-      new BundleAnalyzerPlugin(),
+      // new BundleAnalyzerPlugin(),
     ],
   };
 

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { LOCAL_STORAGE_KEY } from "ultils/constants";
 const authServiceAxios = axios.create();
-const apiUrl = ENV.API_URL;
+const apiUrl = ENV.CORE_API_URL;
 
 authServiceAxios.interceptors.response.use(
   function (response) {
