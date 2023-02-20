@@ -25,7 +25,7 @@ authServiceAxios.interceptors.request.use(function (config) {
 export const authService = {
   login: async (params: any) => {
     const { email, password } = params;
-    const { data } = await authServiceAxios.post(`/auth/login`, { email, password, type: "email" });
+    const { data } = await authServiceAxios.post(`core/auth/login`, { email, password, type: "email" });
     localStorage.setItem(LOCAL_STORAGE_KEY.USER, JSON.stringify(data));
     return Promise.resolve();
   },
