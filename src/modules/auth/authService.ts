@@ -1,7 +1,7 @@
 import axios from "axios";
 import { LOCAL_STORAGE_KEY } from "ultils/constants";
 const authServiceAxios = axios.create();
-const apiUrl = ENV.CORE_API_URL;
+const baseUrl = ENV.BASE_URL;
 
 authServiceAxios.interceptors.response.use(
   function (response) {
@@ -17,11 +17,15 @@ authServiceAxios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+authServiceAxios.interceptors.request.use(function (config) {
+  config.baseURL = baseUrl;
+  return config;
+});
 
 export const authService = {
   login: async (params: any) => {
     const { email, password } = params;
-    const { data } = await authServiceAxios.post(`${apiUrl}/auth/login`, { email, password, type: "email" });
+    const { data } = await authServiceAxios.post(`core/auth/login`, { email, password, type: "email" });
     localStorage.setItem(LOCAL_STORAGE_KEY.USER, JSON.stringify(data));
     return Promise.resolve();
   },

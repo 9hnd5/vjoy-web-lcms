@@ -16,7 +16,7 @@ import userComponents from "modules/user/components";
 const App = () => {
   return (
     <Admin dataProvider={dataService} authProvider={authService} loginPage={LoginPage} theme={theme}>
-      <Resource name="users" {...userComponents.user} />
+      <Resource name="core/users" options={{ label: "Users" }} {...userComponents.user} />
     </Admin>
   );
 };
