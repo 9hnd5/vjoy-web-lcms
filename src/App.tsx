@@ -1,6 +1,6 @@
 import { authService } from "modules/auth/authService";
 import { LoginPage } from "modules/auth/components/LoginPage";
-import { Admin, defaultTheme, ListGuesser, Resource } from "react-admin";
+import { Admin, defaultTheme, Resource } from "react-admin";
 import dataService from "services/dataService";
 const theme = {
   ...defaultTheme,
@@ -10,10 +10,13 @@ const theme = {
     fontSize: 16,
   },
 };
+
+import userComponents from "modules/user/components";
+
 const App = () => {
   return (
     <Admin dataProvider={dataService} authProvider={authService} loginPage={LoginPage} theme={theme}>
-      <Resource name="users" list={ListGuesser} />
+      <Resource name="users" {...userComponents.user} />
     </Admin>
   );
 };

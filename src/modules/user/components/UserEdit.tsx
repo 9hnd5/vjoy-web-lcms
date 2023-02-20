@@ -1,16 +1,21 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import {
-  DateInput,
+  AutocompleteInput,
   Edit,
   email,
   maxLength,
-  RadioButtonGroupInput, required,
+  required,
+  SelectInput,
   SimpleForm,
-  TextInput
+  TextInput,
+  useGetList,
 } from "react-admin";
+import { USER_STATUS } from "../user.constants";
 
 export const UserEdit = () => {
+  const roles = useGetList("roles");
+
   return (
     <Edit>
       <SimpleForm style={{ maxWidth: 500 }}>
@@ -20,42 +25,16 @@ export const UserEdit = () => {
         </Box>
         <Box display={{ xs: "block", sm: "flex", width: "100%" }}>
           <Box flex={1} mr={{ xs: 0, sm: "0.5em" }}>
-            <TextInput
-              source="firstName"
-              label="First Name"
-              fullWidth
-              validate={[required(), maxLength(50)]}
-            />
+            <TextInput source="firstname" label="First Name" fullWidth validate={[required(), maxLength(50)]} />
           </Box>
           <Box flex={1} ml={{ xs: 0, sm: "0.5em" }}>
-            <TextInput
-              source="lastName"
-              label="Last Name"
-              fullWidth
-              validate={[required(), maxLength(50)]}
-            />
+            <TextInput source="lastname" label="Last Name" fullWidth validate={[required(), maxLength(50)]} />
           </Box>
         </Box>
-        <DateInput
-          source="dateOfBirth"
-          label="Date of birth"
-          fullWidth
-          validate={[required()]}
-        />
-        <TextInput
-          source="email"
-          label="Email"
-          fullWidth
-          validate={[email(), required()]}
-        />
-        <RadioButtonGroupInput
-          source="gender"
-          choices={[
-            { id: "Male", name: "Male" },
-            { id: "Female", name: "Female" },
-          ]}
-          validate={[required()]}
-        />
+        <TextInput source="email" label="Email" fullWidth validate={[email()]} />
+        <TextInput source="phone" label="Phone" fullWidth />
+        <AutocompleteInput source="roleId" label="Role" choices={roles.data} fullWidth validate={[required()]} />
+        <SelectInput source="status" choices={USER_STATUS} />
       </SimpleForm>
     </Edit>
   );

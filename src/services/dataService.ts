@@ -38,18 +38,19 @@ const dataService = {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
     const query = {
-      sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
       filter: JSON.stringify(params.filter),
+      page: page,
+      pageSize: perPage,
+      sort: JSON.stringify([[field, order]]),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     const { data } = await dataServiceAxios.get(url);
-    return data;
+    return { data: data.rows, total: data.count };
   },
 
   getOne: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await dataServiceAxios.get(url);
+    const data = await dataServiceAxios.get(url);
     return data;
   },
 
@@ -58,7 +59,7 @@ const dataService = {
       filter: JSON.stringify({ ids: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await dataServiceAxios.get(url);
+    const data = await dataServiceAxios.get(url);
     return data;
   },
 
@@ -66,12 +67,13 @@ const dataService = {
     const { page, perPage } = params.pagination;
     const { field, order } = params.sort;
     const query = {
-      sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
       filter: JSON.stringify({
         ...params.filter,
         [params.target]: params.id,
       }),
+      page: page,
+      pageSize: perPage,
+      sort: JSON.stringify([[field, order]]),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
     const { data } = await dataServiceAxios.get(url);
@@ -80,13 +82,13 @@ const dataService = {
 
   create: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}`;
-    const { data } = await dataServiceAxios.post(url, params.data);
+    const data = await dataServiceAxios.post(url, params.data);
     return data;
   },
 
   update: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await dataServiceAxios.put(url, params.data);
+    const data = await dataServiceAxios.patch(url, params.data);
     return data;
   },
 
@@ -95,13 +97,13 @@ const dataService = {
       ids: JSON.stringify({ id: params.ids }),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await dataServiceAxios.put(url, params.data);
+    const data = await dataServiceAxios.patch(url, params.data);
     return data;
   },
 
   delete: async (resource: string, params: any) => {
     const url = `${apiUrl}/${resource}/${params.id}`;
-    const { data } = await dataServiceAxios.delete(url);
+    const data = await dataServiceAxios.delete(url);
     return data;
   },
 
@@ -110,7 +112,7 @@ const dataService = {
       ids: JSON.stringify(params.ids),
     };
     const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { data } = await dataServiceAxios.delete(url);
+    const data = await dataServiceAxios.delete(url);
     return data;
   },
 };
