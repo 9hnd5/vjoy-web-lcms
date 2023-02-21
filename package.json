@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack serve --config webpack/webpack.config.js --env env=dev",
+    "build:dev": "webpack --config webpack/webpack.config.js --env env=prod",
     "start:prod": "",
     "build:prod": "webpack --config webpack/webpack.config.js --env env=prod",
     "start:staging": "",
