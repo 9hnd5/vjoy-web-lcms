@@ -1,4 +1,6 @@
 FROM node:18-alpine AS dependencies
+ARG env
+
 WORKDIR /app
 COPY package.json yarn.lock ./
 ENV NODE_ENV development
