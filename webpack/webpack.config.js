@@ -8,17 +8,21 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 
 //Get config base on env build
 function getEnvConfig(env) {
-  if (env === "prod" || env === "dev") {
-    return require(path.join(__dirname, `./webpack.${env}.js`));
-  } else {
-    return require(path.join(__dirname, `./webpack.prod.js`));
-  }
+  if (env === "localDev") return require(path.join(__dirname, `./webpack.dev.js`));
+  if (env === "dev") return require(path.join(__dirname, `./webpack.prod.js`));
+  return require(path.join(__dirname, `./webpack.${env}.js`));
+}
+
+//Get env variables
+function getEnvVars(env) {
+  if (env === "localDev") return require(path.join(process.cwd(), `env/dev`));
+  return require(path.join(process.cwd(), `env/${env}`));
 }
 
 module.exports = ({ env }) => {
   const envConfig = getEnvConfig(env);
 
-  const envVars = require(path.join(process.cwd(), `env/${env}`));
+  const envVars = getEnvVars(env);
 
   const commonConfig = {
     entry: path.join(process.cwd(), "src/index.tsx"),
