@@ -5,17 +5,15 @@ import {
   Edit,
   email,
   maxLength,
+  ReferenceInput,
   required,
   SelectInput,
   SimpleForm,
   TextInput,
-  useGetList,
 } from "react-admin";
 import { USER_STATUS } from "../user.constants";
 
 export const UserEdit = () => {
-  const roles = useGetList("roles");
-
   return (
     <Edit>
       <SimpleForm style={{ maxWidth: 500 }}>
@@ -31,10 +29,14 @@ export const UserEdit = () => {
             <TextInput source="lastname" label="Last Name" fullWidth validate={[required(), maxLength(50)]} />
           </Box>
         </Box>
-        <TextInput source="email" label="Email" fullWidth validate={[email()]} />
-        <TextInput source="phone" label="Phone" fullWidth />
-        <AutocompleteInput source="roleId" label="Role" choices={roles.data} fullWidth validate={[required()]} />
-        <SelectInput source="status" choices={USER_STATUS} />
+        <Box display={{ width: "100%" }}>
+          <TextInput source="email" label="Email" fullWidth validate={[email()]} />
+          <TextInput source="phone" label="Phone" fullWidth />
+          <ReferenceInput source="roleId" reference="core/roles">
+            <AutocompleteInput optionText="name" validate={[required()]} />
+          </ReferenceInput>
+          <SelectInput source="status" choices={USER_STATUS} validate={[required()]} />
+        </Box>
       </SimpleForm>
     </Edit>
   );

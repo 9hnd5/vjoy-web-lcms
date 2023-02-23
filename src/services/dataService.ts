@@ -60,8 +60,8 @@ const dataService = {
       filter: JSON.stringify({ ids: params.ids }),
     };
     const url = `${resource}?${stringify(query)}`;
-    const data = await dataServiceAxios.get(url);
-    return data;
+    const { data } = await dataServiceAxios.get(url);
+    return { data: data.rows };
   },
 
   getManyReference: async (resource: string, params: any) => {

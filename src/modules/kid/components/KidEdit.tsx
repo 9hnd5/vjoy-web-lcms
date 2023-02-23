@@ -1,23 +1,26 @@
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import {
   AutocompleteInput,
-  Create,
-  email,
+  Edit,
   maxLength,
   ReferenceInput,
   required,
-  SelectInput,
   SimpleForm,
   TextInput,
+  useEditContext,
+  useRecordContext,
 } from "react-admin";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import { USER_STATUS } from "../user.constants";
 
-export const UserCreate = () => {
+export const KidEdit = () => {
+  
   return (
-    <Create>
-      <SimpleForm sx={{ maxWidth: 500 }}>
-        <Typography variant="h5">Create User</Typography>
+    <Edit>
+      <SimpleForm style={{ maxWidth: 500 }}>
+        <Typography variant="h5">Edit Kid</Typography>
+        <Box display={{ width: "100%" }}>
+          <TextInput source="id" disabled fullWidth />
+        </Box>
         <Box display={{ xs: "block", sm: "flex", width: "100%" }}>
           <Box flex={1} mr={{ xs: 0, sm: "0.5em" }}>
             <TextInput source="firstname" label="First Name" fullWidth validate={[required(), maxLength(50)]} />
@@ -27,14 +30,17 @@ export const UserCreate = () => {
           </Box>
         </Box>
         <Box display={{ width: "100%" }}>
-          <TextInput source="email" label="Email" fullWidth validate={[required(), email()]} />
-          <TextInput source="phone" label="Phone" fullWidth />
+          <ReferenceInput source="parentId" reference="core/users">
+            <AutocompleteInput
+              optionText={(choice) => `${choice.firstname} ${choice.lastname}`}
+              validate={[required()]}
+            />
+          </ReferenceInput>
           <ReferenceInput source="roleId" reference="core/roles">
             <AutocompleteInput optionText="name" validate={[required()]} />
           </ReferenceInput>
-          <SelectInput source="status" choices={USER_STATUS} validate={[required()]} />
         </Box>
       </SimpleForm>
-    </Create>
+    </Edit>
   );
 };
