@@ -32,7 +32,7 @@ export const KidEdit = () => {
           notify("Kid update successful");
           redirect("list", "core/kids");
         },
-        onError: () => notify("Kid update failed"),
+        onError: (error) => notify(`Kid update failed ${error}`),
       }
     );
   };

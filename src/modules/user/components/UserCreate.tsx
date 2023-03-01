@@ -5,13 +5,11 @@ import {
   maxLength,
   ReferenceInput,
   required,
-  SelectInput,
   SimpleForm,
   TextInput,
 } from "react-admin";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { USER_STATUS } from "../user.constants";
 
 export const UserCreate = () => {
   return (

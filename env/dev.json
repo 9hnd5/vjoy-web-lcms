@@ -1,4 +1,4 @@
 {
-  "BASE_URL": "http://localhost:3001/api/v1/dev",
+  "BASE_URL": "https://vjoy-core-dev-qconrzsxya-de.a.run.app/api/v1/dev",
   "API_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQVBJIGtleSBmb3IgdmpveS13ZWIiLCJ0eXBlIjoidmpveS13ZWIiLCJlbnYiOiJkZXYiLCJpYXQiOjE2NzcxMjYxMzN9.NaWXerIGMk24ITeLjXFr0YaaoRZwcrhk2y4I4p8JJE8"
 }

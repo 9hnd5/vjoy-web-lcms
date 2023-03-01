@@ -29,7 +29,7 @@ export const KidCreate = () => {
           notify("Kid create successful");
           redirect("list", "core/kids");
         },
-        onError: () => notify("Kid create failed"),
+        onError: (error) => notify(`Kid create failed ${error}`),
       }
     );
   };

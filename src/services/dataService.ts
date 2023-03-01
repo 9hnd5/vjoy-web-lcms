@@ -4,7 +4,7 @@ import qs from "query-string";
 import { HttpError } from "react-admin";
 import { EXCLUDED_FIELDS, LOCAL_STORAGE_KEY } from "ultils/constants";
 const { stringify } = qs;
-const dataServiceAxios = axios.create();
+export const dataServiceAxios = axios.create();
 const baseUrl = ENV.BASE_URL;
 
 dataServiceAxios.interceptors.response.use(

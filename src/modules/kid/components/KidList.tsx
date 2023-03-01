@@ -58,7 +58,7 @@ const DeleteButton = (props: any) => {
           setOpen(false);
           refresh();
         },
-        onError: () => notify("Kid delete failed"),
+        onError: (error) => notify(`Kid delete failed ${error}`),
       }
     );
   };
