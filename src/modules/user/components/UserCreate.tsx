@@ -32,7 +32,6 @@ export const UserCreate = () => {
           <ReferenceInput source="roleId" reference="core/roles">
             <AutocompleteInput optionText="name" validate={[required()]} />
           </ReferenceInput>
-          <SelectInput source="status" choices={USER_STATUS} validate={[required()]} />
         </Box>
       </SimpleForm>
     </Create>

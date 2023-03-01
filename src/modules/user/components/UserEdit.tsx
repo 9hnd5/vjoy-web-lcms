@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { EditToolbar } from "components/EditToolbar";
 import {
   AutocompleteInput,
   Edit,
@@ -16,7 +17,7 @@ import { USER_STATUS } from "../user.constants";
 export const UserEdit = () => {
   return (
     <Edit>
-      <SimpleForm style={{ maxWidth: 500 }}>
+      <SimpleForm style={{ maxWidth: 500 }} toolbar={<EditToolbar />} >
         <Typography variant="h5">Edit User</Typography>
         <Box display={{ width: "100%" }}>
           <TextInput source="id" disabled fullWidth />
