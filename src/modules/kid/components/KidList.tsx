@@ -1,99 +1,65 @@
-import { Delete, Edit } from "@mui/icons-material";
+import { Edit } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { isEmpty } from "lodash";
-import { useState } from "react";
 import {
+  Button,
+  CreateButton,
   Datagrid,
   DateField,
-  CreateButton,
+  DeleteWithConfirmButton,
   FilterButton,
   FunctionField,
   List,
+  SearchInput,
   TextField,
   TopToolbar,
-  SearchInput,
-  Button,
   useRecordContext,
   useRedirect,
-  useDelete,
-  useNotify,
-  Confirm,
-  useRefresh,
+  WithRecord
 } from "react-admin";
 
 const listFilters = [<SearchInput key="search" source="q" alwaysOn />];
 
-const ListActions = () => (
-  <TopToolbar>
-    <FilterButton filters={listFilters} />
-    <CreateButton />
-  </TopToolbar>
-);
-
-const EditButton = (props: any) => {
-  const record = useRecordContext();
-  const redirect = useRedirect();
-  const handleClick = () => {
-    redirect(`/core/parents/${record.parentId}/kids/${record.id}`);
-  };
-  return <Button label="Edit" onClick={handleClick} {...props} startIcon={<Edit />} />;
+const ListActions = () => {
+  return (
+    <TopToolbar>
+      <FilterButton filters={listFilters} />
+      <CreateButton />
+    </TopToolbar>
+  );
 };
 
-const DeleteButton = (props: any) => {
-  const record = useRecordContext();
-  const notify = useNotify();
-  const refresh = useRefresh();
-  const [deleteKid] = useDelete();
-
-  const [open, setOpen] = useState(false);
-  const handleClick = () => setOpen(true);
-  const handleDialogClose = () => setOpen(false);
-  const handleConfirm = () => {
-    deleteKid(
-      "core/parents",
-      { id: record.id, meta: { userId: record.parentId } },
-      {
-        onSuccess: () => {
-          notify("Kid delete successful");
-          setOpen(false);
-          refresh();
-        },
-        onError: (error) => notify(`Kid delete failed ${error}`),
-      }
-    );
-  };
-  return (
-    <>
-      <Button label="Delete" onClick={handleClick} {...props} startIcon={<Delete />} color="error" />
-      <Confirm
-        isOpen={open}
-        title={`Delete kid #${record.id}`}
-        content="Are you sure you want to delete this kid?"
-        onConfirm={handleConfirm}
-        onClose={handleDialogClose}
-      />
-    </>
-  );
+const EditButton = () => {
+  const {
+    id,
+    parent: { id: parentId },
+  } = useRecordContext();
+  const redirect = useRedirect();
+  return <Button label="edit" onClick={() => redirect(`/core/users/${parentId}/kids/${id}`)} startIcon={<Edit />} />;
 };
 
 export const KidList = () => {
   return (
     <List filters={listFilters} actions={<ListActions />}>
-      <Datagrid bulkActionButtons={false}>
-        <TextField source="id" />
-        <FunctionField label="Full name" render={(record: any) => `${record.firstname} ${record.lastname}`} />
-        <DateField label="Date of birth" source="dob" locales="en-GB" />
-        <FunctionField
-          label="Parent"
-          render={(record: any) =>
-            !isEmpty(record.parent) ? `${record.parent.firstname} ${record.parent.lastname}` : ""
-          }
-        />
-        <FunctionField label="Role" render={(record: any) => record.role.name} />
-        <DateField source="updatedAt" locales="en-GB" showTime={true} />
-        <Box display={{ xs: "block", sm: "flex", width: "100%" }}>
+      <Datagrid
+        size="medium"
+        sx={{
+          "& .column-id": { width: 100 },
+          "& .RaDatagrid-rowCell": { overflow: "hidden", textOverflow: "ellipsis" },
+        }}
+        bulkActionButtons={false}
+        style={{ tableLayout: "fixed" }}
+      >
+        <TextField label="ID" source="id" />
+        <FunctionField label="Name" noWrap render={(record: any) => `${record.firstname} ${record.lastname}`} />
+        <DateField label="DoB" source="dob" locales="en-GB" />
+        <FunctionField label="Parent" noWrap render={({ parent }: any) => `${parent.firstname} ${parent.lastname}`} />
+        <TextField label="Role" source="role.name" />
+        <DateField label="Last Updated" noWrap source="updatedAt" locales="en-GB" showTime={true} />
+        <Box sx={{ display: "flex" }}>
           <EditButton />
-          <DeleteButton />
+          <WithRecord
+            render={({ parent: { id } }) => <DeleteWithConfirmButton mutationOptions={{ meta: { userId: id } }} />}
+          />
         </Box>
       </Datagrid>
     </List>

@@ -19,6 +19,7 @@ authServiceAxios.interceptors.response.use(
 );
 authServiceAxios.interceptors.request.use(function (config) {
   config.baseURL = baseUrl;
+  config.headers.set("api-token", ENV.API_TOKEN);
   return config;
 });
 
