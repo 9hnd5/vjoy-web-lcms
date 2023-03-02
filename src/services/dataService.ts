@@ -1,9 +1,10 @@
 import axios from "axios";
+import { omit } from "lodash";
 import qs from "query-string";
 import { HttpError } from "react-admin";
-import { LOCAL_STORAGE_KEY } from "ultils/constants";
+import { EXCLUDED_FIELDS, LOCAL_STORAGE_KEY } from "ultils/constants";
 const { stringify } = qs;
-const dataServiceAxios = axios.create();
+export const dataServiceAxios = axios.create();
 const baseUrl = ENV.BASE_URL;
 
 dataServiceAxios.interceptors.response.use(
@@ -31,6 +32,7 @@ dataServiceAxios.interceptors.request.use(function (config) {
   const parseUser = JSON.parse(user);
   config.headers.authorization = `Bearer ${parseUser.accessToken}`;
   config.baseURL = baseUrl;
+  config.headers.set("api-token", ENV.API_TOKEN);
   return config;
 });
 
@@ -60,8 +62,8 @@ const dataService = {
       filter: JSON.stringify({ ids: params.ids }),
     };
     const url = `${resource}?${stringify(query)}`;
-    const data = await dataServiceAxios.get(url);
-    return data;
+    const { data } = await dataServiceAxios.get(url);
+    return { data: data.rows };
   },
 
   getManyReference: async (resource: string, params: any) => {
@@ -89,7 +91,7 @@ const dataService = {
 
   update: async (resource: string, params: any) => {
     const url = `${resource}/${params.id}`;
-    const data = await dataServiceAxios.patch(url, params.data);
+    const data = await dataServiceAxios.patch(url, omit(params.data, EXCLUDED_FIELDS));
     return data;
   },
 

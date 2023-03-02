@@ -3,19 +3,15 @@ import {
   Create,
   email,
   maxLength,
+  ReferenceInput,
   required,
-  SelectInput,
   SimpleForm,
   TextInput,
-  useGetList,
 } from "react-admin";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { USER_STATUS } from "../user.constants";
 
 export const UserCreate = () => {
-  const roles = useGetList("roles");
-
   return (
     <Create>
       <SimpleForm sx={{ maxWidth: 500 }}>
@@ -28,10 +24,13 @@ export const UserCreate = () => {
             <TextInput source="lastname" label="Last Name" fullWidth validate={[required(), maxLength(50)]} />
           </Box>
         </Box>
-        <TextInput source="email" label="Email" fullWidth validate={[required(), email()]} />
-        <TextInput source="phone" label="Phone" fullWidth />
-        <AutocompleteInput source="roleId" label="Role" choices={roles.data} fullWidth validate={[required()]} />
-        <SelectInput source="status" choices={USER_STATUS} />
+        <Box display={{ width: "100%" }}>
+          <TextInput source="email" label="Email" fullWidth validate={[required(), email()]} />
+          <TextInput source="phone" label="Phone" fullWidth />
+          <ReferenceInput source="roleId" reference="core/roles">
+            <AutocompleteInput optionText="name" validate={[required()]} />
+          </ReferenceInput>
+        </Box>
       </SimpleForm>
     </Create>
   );

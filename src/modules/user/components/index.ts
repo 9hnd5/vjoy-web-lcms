@@ -3,9 +3,7 @@ import { UserEdit } from "./UserEdit";
 import { UserList } from "./UserList";
 
 export default {
-  user: {
-    list: UserList,
-    edit: UserEdit,
-    create: UserCreate,
-  }
+  list: UserList,
+  edit: UserEdit,
+  create: UserCreate,
 };
