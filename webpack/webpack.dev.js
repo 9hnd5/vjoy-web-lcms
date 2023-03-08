@@ -9,6 +9,7 @@ module.exports = {
     compress: true,
     port: 3000,
     historyApiFallback: true,
+    watchFiles: ["src/**/*"],
     static: path.resolve(process.cwd(), "dll"),
     devMiddleware: {
       writeToDisk: false,

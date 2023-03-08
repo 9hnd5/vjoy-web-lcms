@@ -18,7 +18,6 @@ const kidService = {
   },
 
   update: async (resource: string, params: any) => {
-    console.log(omit(params.data, EXCLUDED_FIELDS));
     const url = `/core/users/${params.meta.userId}/kids/${params.id}`;
     const data = await dataServiceAxios.patch(url, omit(params.data, EXCLUDED_FIELDS));
     return data;

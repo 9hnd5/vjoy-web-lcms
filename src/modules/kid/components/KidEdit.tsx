@@ -1,4 +1,4 @@
-import Box from "@mui/material/Box";
+import { Box } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { EditToolbar } from "components/EditToolbar";
 import {
@@ -11,66 +11,50 @@ import {
   SelectInput,
   SimpleForm,
   TextInput,
-  useNotify,
-  useRedirect,
-  useUpdate,
 } from "react-admin";
 import { useParams } from "react-router-dom";
 import { KID_GENDER } from "../kid.constants";
 
 export const KidEdit = () => {
-  const { parentId, kidId } = useParams();
-  const notify = useNotify();
-  const redirect = useRedirect();
-  const [update] = useUpdate();
-  const kidSave = (data: any) => {
-    update(
-      "core/parents",
-      { id: kidId, data, meta: { userId: parentId } },
-      {
-        onSuccess: () => {
-          notify("Kid update successful");
-          redirect("list", "core/kids");
-        },
-        onError: (error) => notify(`Kid update failed ${error}`),
-      }
-    );
-  };
-
+  const { userId, kidId } = useParams();
   return (
-    <Edit resource="core/parents" id={kidId} queryOptions={{ meta: { userId: parentId } }}>
-      <SimpleForm style={{ maxWidth: 500 }} toolbar={<EditToolbar />} onSubmit={kidSave}>
+    <Edit
+      mutationMode="pessimistic"
+      resource="core/kids"
+      id={kidId}
+      mutationOptions={{ meta: { userId } }}
+      queryOptions={{ meta: { userId } }}
+    >
+      <SimpleForm style={{ maxWidth: 500 }} toolbar={<EditToolbar />}>
         <Typography variant="h5">Edit Kid</Typography>
-        <Box display={{ width: "100%" }}>
-          <TextInput source="id" disabled fullWidth />
+        <TextInput source="id" disabled fullWidth />
+        <Box sx={{ display: "flex", width: "100%", gap: "0.5em" }}>
+          <TextInput source="firstname" label="First Name" fullWidth validate={[required(), maxLength(50)]} />
+          <TextInput source="lastname" label="Last Name" fullWidth validate={[required(), maxLength(50)]} />
         </Box>
-        <Box display={{ xs: "block", sm: "flex", width: "100%" }}>
-          <Box flex={1} mr={{ xs: 0, sm: "0.5em" }}>
-            <TextInput source="firstname" label="First Name" fullWidth validate={[required(), maxLength(50)]} />
-          </Box>
-          <Box flex={1} ml={{ xs: 0, sm: "0.5em" }}>
-            <TextInput source="lastname" label="Last Name" fullWidth validate={[required(), maxLength(50)]} />
-          </Box>
+        <Box sx={{ display: "flex", width: "100%", gap: "0.5em" }}>
+          <DateInput source="dob" label="Date of birth" fullWidth />
+          <SelectInput source="gender" label="Gender" choices={KID_GENDER} fullWidth />
         </Box>
-        <Box display={{ xs: "block", sm: "flex", width: "100%" }}>
-          <Box flex={1} mr={{ xs: 0, sm: "0.5em" }}>
-            <DateInput source="dob" label="Date of birth" fullWidth />
-          </Box>
-          <Box flex={1} ml={{ xs: 0, sm: "0.5em" }}>
-            <SelectInput source="gender" label="Gender" choices={KID_GENDER} />
-          </Box>
-        </Box>
-        <Box display={{ width: "100%" }}>
-          <ReferenceInput source="parentId" reference="core/users">
-            <AutocompleteInput
-              optionText={(choice) => `${choice.firstname} ${choice.lastname}`}
-              validate={[required()]}
-            />
-          </ReferenceInput>
-          <ReferenceInput source="roleId" reference="core/roles">
-            <AutocompleteInput optionText="name" validate={[required()]} />
-          </ReferenceInput>
-        </Box>
+        <ReferenceInput source="parent.id" reference="core/users">
+          <AutocompleteInput
+            label="Parent"
+            name="parentId"
+            optionText={(choice) => `${choice.firstname} ${choice.lastname}`}
+            validate={[required()]}
+            fullWidth
+          />
+        </ReferenceInput>
+        <ReferenceInput source="role.code" reference="core/roles">
+          <AutocompleteInput
+            label="Role"
+            name="roleCode"
+            optionText="name"
+            optionValue="code"
+            validate={[required()]}
+            fullWidth
+          />
+        </ReferenceInput>
       </SimpleForm>
     </Edit>
   );
