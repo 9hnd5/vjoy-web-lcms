@@ -17,7 +17,7 @@ import { USER_STATUS } from "../user.constants";
 export const UserEdit = () => {
   return (
     <Edit>
-      <SimpleForm style={{ maxWidth: 500 }} toolbar={<EditToolbar />} >
+      <SimpleForm style={{ maxWidth: 500 }} toolbar={<EditToolbar />}>
         <Typography variant="h5">Edit User</Typography>
         <Box display={{ width: "100%" }}>
           <TextInput source="id" disabled fullWidth />

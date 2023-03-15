@@ -1,18 +1,15 @@
-import { Box } from "@mui/material";
 import {
+  CreateButton,
   Datagrid,
   DateField,
-  CreateButton,
   EmailField,
   FilterButton,
   FunctionField,
   List,
+  SearchInput,
+  SelectField,
   TextField,
   TopToolbar,
-  SelectField,
-  SearchInput,
-  EditButton,
-  DeleteWithConfirmButton,
 } from "react-admin";
 import { USER_STATUS } from "../user.constants";
 
@@ -28,19 +25,23 @@ const ListActions = () => (
 export const UserList = () => {
   return (
     <List filters={listFilters} actions={<ListActions />}>
-      <Datagrid bulkActionButtons={false}>
+      <Datagrid
+        size="medium"
+        sx={{
+          "& .column-id": { width: 100 },
+          "& .RaDatagrid-rowCell": { overflow: "hidden", textOverflow: "ellipsis" },
+        }}
+        bulkActionButtons={false}
+        style={{ tableLayout: "fixed" }}
+        rowClick="edit"
+      >
         <TextField source="id" />
-        <TextField label="First name" source="firstname" />
-        <TextField label="Last name" source="lastname" />
-        <EmailField source="email"/>
+        <FunctionField label="Name" noWrap render={(record: any) => `${record.firstname} ${record.lastname}`} />
+        <EmailField source="email" />
         <TextField source="phone" />
         <SelectField source="status" choices={USER_STATUS} />
         <FunctionField label="Role" render={(record: any) => record.role.name} />
-        <DateField source="createdAt" locales="en-GB" showTime={true} />
-        <Box display={{ xs: "block", sm: "flex", width: "100%" }}>
-          <EditButton />
-          <DeleteWithConfirmButton />
-        </Box>
+        <DateField label="Last Updated" noWrap source="updatedAt" locales="en-GB" showTime={true} />
       </Datagrid>
     </List>
   );
