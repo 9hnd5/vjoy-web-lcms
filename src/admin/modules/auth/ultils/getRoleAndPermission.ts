@@ -1,4 +1,5 @@
-import { LOCAL_STORAGE_KEY } from "ultils/constants";
+import { LOCAL_STORAGE_KEY } from "admin/ultils/constants";
+
 /**
  * Get the role and permission of a user from local storage.
  * @returns {Object} An object containing the roleId and permissions of a user. If no user is found, return null.
