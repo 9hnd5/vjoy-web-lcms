@@ -1,5 +1,5 @@
+import { LOCAL_STORAGE_KEY } from "admin/ultils/constants";
 import axios from "axios";
-import { LOCAL_STORAGE_KEY } from "ultils/constants";
 const authServiceAxios = axios.create();
 const baseUrl = ENV.BASE_URL;
 

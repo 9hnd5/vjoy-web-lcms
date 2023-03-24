@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { EditToolbar } from "components/EditToolbar";
+import { EditToolbar } from "admin/components/EditToolbar";
 import {
   AutocompleteInput,
   Edit,

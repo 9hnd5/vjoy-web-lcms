@@ -1,8 +1,8 @@
+import { EXCLUDED_FIELDS, LOCAL_STORAGE_KEY } from "admin/ultils/constants";
 import axios from "axios";
 import { omit } from "lodash";
 import qs from "query-string";
 import { HttpError } from "react-admin";
-import { EXCLUDED_FIELDS, LOCAL_STORAGE_KEY } from "ultils/constants";
 const { stringify } = qs;
 export const dataServiceAxios = axios.create();
 const baseUrl = ENV.BASE_URL;

@@ -1,5 +1,5 @@
-import { LoginForm } from "modules/auth/components/LoginForm";
 import styled from "styled-components";
+import { LoginForm } from "./LoginForm";
 
 const Container = styled.div`
   width: 100vw;
