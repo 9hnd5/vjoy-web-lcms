@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, GridProps } from "@mui/material";
 import React from "react";
 const EditorSceneContext = React.createContext(false);
 type EditorSceneProps = {
@@ -7,8 +7,8 @@ type EditorSceneProps = {
     1: React.ReactElement<typeof Mid>;
     2: React.ReactElement<typeof Right>;
   };
-};
-const EditorScene = ({ children }: EditorSceneProps) => {
+} & Omit<GridProps, "item" | "container" | "children">;
+const EditorScene = ({ children, ...restProps }: EditorSceneProps) => {
   const left = React.Children.toArray(children)[0] as React.ReactElement<typeof Left>;
   const mid = React.Children.toArray(children)[1] as React.ReactElement<typeof Mid>;
   const right = React.Children.toArray(children)[2] as React.ReactElement<typeof Right>;
@@ -21,42 +21,47 @@ const EditorScene = ({ children }: EditorSceneProps) => {
 
   return (
     <EditorSceneContext.Provider value={true}>
-      <Grid container>{children}</Grid>
+      <Grid {...restProps} container>
+        {children}
+      </Grid>
     </EditorSceneContext.Provider>
   );
 };
 
 type RightMidLeftProps = {
   children?: React.ReactNode;
-};
+} & Omit<GridProps, "item" | "container" | "children">;
 const Right = (props: RightMidLeftProps) => {
+  const { children, ...restProps } = props;
   const context = React.useContext(EditorSceneContext);
   if (!context) throw new Error("EditorScene.Right Component should be inside EditorScene");
 
   return (
-    <Grid xs={4} item>
-      {props.children}
+    <Grid {...restProps} item>
+      {children}
     </Grid>
   );
 };
 const Mid = (props: RightMidLeftProps) => {
+  const { children, ...restProps } = props;
   const context = React.useContext(EditorSceneContext);
   if (!context) throw new Error("EditorScene.Mid Component should be inside EditorScene");
 
   return (
-    <Grid xs={4} item>
-      {props.children}
+    <Grid {...restProps} item>
+      {children}
     </Grid>
   );
 };
 
 const Left = (props: RightMidLeftProps) => {
+  const { children, ...restProps } = props;
   const context = React.useContext(EditorSceneContext);
   if (!context) throw new Error("EditorScene.Left Component should be inside EditorScene");
 
   return (
-    <Grid xs={4} item>
-      {props.children}
+    <Grid {...restProps} item>
+      {children}
     </Grid>
   );
 };
