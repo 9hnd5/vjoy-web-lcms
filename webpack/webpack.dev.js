@@ -57,6 +57,9 @@ module.exports = {
     new webpack.DllReferencePlugin({
       manifest: require(path.resolve(process.cwd(), "dll/mui.manifest.json")),
     }),
+    new webpack.DllReferencePlugin({
+      manifest: require(path.resolve(process.cwd(), "dll/rtk.manifest.json")),
+    }),
   ],
   output: {
     path: path.join(process.cwd(), "./dist"),
