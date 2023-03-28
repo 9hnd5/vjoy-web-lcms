@@ -1,20 +1,34 @@
 import { Box, Grid } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
-import { ImageSelect } from "./components/ImageSelect";
-import bg1 from "assets/images/bg1.jpg";
-import bg2 from "assets/images/bg2.jpg";
-import bg3 from "assets/images/bg3.jpg";
-import c1 from "assets/images/c1.jpg";
-import c2 from "assets/images/c2.jpg";
-import c3 from "assets/images/c3.jpg";
 import { EditorScene } from "gms/components/EditorScene";
+import { ImageSelect } from "./components/ImageSelect";
 // import { useAppSelector } from "gms/hooks/useAppSelector";
 // import { selectValue } from "./wordBalloonSlice";
+import { useGetAssetsQuery } from "gms/services/assetService";
+import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
+import { useEffect, useState } from "react";
+import Board from "./components/Board";
 
 export const WordBalloon = () => {
   // const value = useAppSelector(selectValue);
-  const cannons = [c1, c2, c3];
-  const bgs = [bg1, bg2, bg3];
+  const { data: assets } = useGetAssetsQuery({ bucket: ASSET_BUCKET, folder: ASSET_FOLDER.WORD_BALLOON });
+  const [backgrounds, setBackgrounds] = useState<string[]>([]);
+  const [cannons, setCannons] = useState<string[]>([]);
+  const [selectedBackground, setSelectedBackground] = useState<string>();
+  const [selectedCannon, setSelectedCannon] = useState<string>();
+
+  useEffect(() => {
+    if (!assets) return;
+
+    const bgs = assets.data.filter((item) => item.includes("/bg/"));
+    const cns = assets.data.filter((item) => item.includes("/cannon/"));
+
+    setBackgrounds(() => bgs);
+    setCannons(() => cns);
+    setSelectedBackground(bgs[0]);
+    setSelectedCannon(cns[0]);
+  }, [assets]);
+
   return (
     <EditorScene>
       <EditorScene.Left xs={2}></EditorScene.Left>
@@ -31,11 +45,44 @@ export const WordBalloon = () => {
                 border: `solid 3px ${blueGrey[300]}`,
                 borderRadius: "10px",
                 overflow: "hidden",
+                position: "relative",
               }}
-            ></Grid>
+            >
+              <Board position="absolute" width="90%" top="25%" left="5%" zIndex="999" />
+              {assets && (
+                <>
+                  <img
+                    src={selectedBackground}
+                    style={{
+                      width: "calc(100% - 16px)",
+                      height: "70%",
+                      objectFit: "cover",
+                      position: "absolute",
+                      bottom: "10%",
+                    }}
+                  />
+
+                  <img
+                    src={selectedCannon}
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      objectFit: "cover",
+                      position: "absolute",
+                      bottom: "10%",
+                      left: "calc(50% - 50px)",
+                    }}
+                  />
+                </>
+              )}
+            </Grid>
             <Grid item xs={3}>
-              <ImageSelect label="Cannon shape" imgs={cannons} viewRow />
-              <ImageSelect label="background theme" imgs={bgs} />
+              {assets && (
+                <>
+                  <ImageSelect label="Cannon shape" imgs={cannons} viewRow onChange={setSelectedCannon} />
+                  <ImageSelect label="background theme" imgs={backgrounds} onChange={setSelectedBackground} />
+                </>
+              )}
             </Grid>
           </Grid>
         </Box>

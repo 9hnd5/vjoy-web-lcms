@@ -3,7 +3,7 @@ import { blueGrey, orange } from "@mui/material/colors";
 import { styled } from "@mui/material/styles";
 
 import { upperCase } from "lodash";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface StyledImageItemProps extends ImageListItemProps {
   selected?: boolean;
@@ -24,17 +24,26 @@ const ImageItem = styled(ImageListItem, {
   }),
 }));
 
-export const ImageSelect = ({ label, imgs, viewRow }: any) => {
-  const [selected, setSelected] = useState(
-    imgs.map(() => {
-      return false;
-    })
-  );
+type ImageSelectProps = {
+  label: string;
+  imgs: string[];
+  viewRow?: boolean;
+  onChange: (value: string) => void;
+};
+
+export const ImageSelect = ({ label, imgs, viewRow, onChange }: ImageSelectProps) => {
+  const [selected, setSelected] = useState<boolean[]>([]);
+
+  useEffect(() => {
+    setSelected(imgs.length > 0 ? [true, ...new Array(imgs.length - 1).fill(false)] : []);
+  }, [imgs]);
+
   return (
     <>
       <InputLabel
         sx={{
           color: orange[500],
+          fontSize: 13,
           fontWeight: "bold",
           padding: "10px",
         }}
@@ -71,9 +80,10 @@ export const ImageSelect = ({ label, imgs, viewRow }: any) => {
                         return i == idx ? !e : false;
                       });
                     });
+                    onChange(elem);
                   }}
                 >
-                  <img src={`${elem}`} style={{ maxHeight: "100px", objectFit: "cover" }} />
+                  <img src={elem} style={{ maxHeight: "100px", objectFit: "cover" }} />
                 </ImageItem>
               );
             })}
