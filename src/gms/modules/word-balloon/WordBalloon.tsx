@@ -4,30 +4,28 @@ import { EditorScene } from "gms/components/EditorScene";
 import { ImageSelect } from "./components/ImageSelect";
 // import { useAppSelector } from "gms/hooks/useAppSelector";
 // import { selectValue } from "./wordBalloonSlice";
+import LoadingComponent from "gms/components/LoadingComponent";
 import { useGetAssetsQuery } from "gms/services/assetService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Board from "./components/Board";
 
 export const WordBalloon = () => {
   // const value = useAppSelector(selectValue);
-  const { data: assets } = useGetAssetsQuery({ bucket: ASSET_BUCKET, folder: ASSET_FOLDER.WORD_BALLOON });
-  const [backgrounds, setBackgrounds] = useState<string[]>([]);
-  const [cannons, setCannons] = useState<string[]>([]);
+  const { data: assets = { data: [] }, isFetching } = useGetAssetsQuery({
+    bucket: ASSET_BUCKET,
+    folder: ASSET_FOLDER.WORD_BALLOON,
+  });
   const [selectedBackground, setSelectedBackground] = useState<string>();
   const [selectedCannon, setSelectedCannon] = useState<string>();
 
-  useEffect(() => {
-    if (!assets) return;
+  if (isFetching) return <LoadingComponent />;
 
-    const bgs = assets.data.filter((item) => item.includes("/bg/"));
-    const cns = assets.data.filter((item) => item.includes("/cannon/"));
+  const backgrounds = assets.data.filter((item) => item.includes("/bg/"));
+  const cannons = assets.data.filter((item) => item.includes("/cannon/"));
 
-    setBackgrounds(() => bgs);
-    setCannons(() => cns);
-    setSelectedBackground(bgs[0]);
-    setSelectedCannon(cns[0]);
-  }, [assets]);
+  if(backgrounds.length && !selectedBackground) setSelectedBackground(backgrounds[0]);
+  if(cannons.length && !selectedCannon) setSelectedCannon(cannons[0]);
 
   return (
     <EditorScene>
@@ -79,8 +77,19 @@ export const WordBalloon = () => {
             <Grid item xs={3}>
               {assets && (
                 <>
-                  <ImageSelect label="Cannon shape" imgs={cannons} viewRow onChange={setSelectedCannon} />
-                  <ImageSelect label="background theme" imgs={backgrounds} onChange={setSelectedBackground} />
+                  <ImageSelect
+                    label="Cannon shape"
+                    imgs={cannons}
+                    selectedImg={selectedCannon}
+                    viewRow
+                    onChange={setSelectedCannon}
+                  />
+                  <ImageSelect
+                    label="background theme"
+                    imgs={backgrounds}
+                    selectedImg={selectedBackground}
+                    onChange={setSelectedBackground}
+                  />
                 </>
               )}
             </Grid>
