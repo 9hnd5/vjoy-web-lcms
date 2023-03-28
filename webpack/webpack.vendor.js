@@ -32,6 +32,7 @@ module.exports = {
     ra: "react-admin",
     router: ["react-router-dom", "react-router"],
     mui: ["@mui/material", "@mui/icons-material", "@mui/base", "@mui/utils", "@mui/system", "@mui/styled-engine"],
+    rtk: ["@reduxjs/toolkit", "react-redux"],
   },
   optimization: {
     minimize: true,
