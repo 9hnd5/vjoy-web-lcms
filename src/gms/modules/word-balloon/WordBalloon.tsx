@@ -1,7 +1,6 @@
 import { Box, Grid } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
 import { EditorScene } from "gms/components/EditorScene";
-import { ImageSelect } from "./components/ImageSelect";
 // import { useAppSelector } from "gms/hooks/useAppSelector";
 // import { selectValue } from "./wordBalloonSlice";
 import LoadingComponent from "gms/components/LoadingComponent";
@@ -9,6 +8,7 @@ import { useGetAssetsQuery } from "gms/services/assetService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
 import { useState } from "react";
 import Board from "./components/Board";
+import { ImageSelect } from "./components/ImageSelect";
 
 export const WordBalloon = () => {
   // const value = useAppSelector(selectValue);
