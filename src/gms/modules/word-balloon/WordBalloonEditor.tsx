@@ -1,7 +1,6 @@
 import { Box, Grid } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
 import { EditorScene } from "gms/components/EditorScene";
-import { ImageSelect } from "./components/ImageSelect";
 // import { useAppSelector } from "gms/hooks/useAppSelector";
 // import { selectValue } from "./wordBalloonSlice";
 import LoadingComponent from "gms/components/LoadingComponent";
@@ -9,23 +8,33 @@ import { useGetAssetsQuery } from "gms/services/assetService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
 import { useState } from "react";
 import Board from "./components/Board";
+import { ImageSelect } from "./components/ImageSelect";
+import { BalloonColor } from "./components/BalloonColor";
+import { AssetImage } from "./wordBalloonType";
 
-export const WordBalloon = () => {
+export const WordBalloonEditor = () => {
   // const value = useAppSelector(selectValue);
-  const { data: assets = { data: [] }, isFetching } = useGetAssetsQuery({
+  const { data: assetsResponse = { data: [] }, isFetching } = useGetAssetsQuery({
     bucket: ASSET_BUCKET,
     folder: ASSET_FOLDER.WORD_BALLOON,
   });
-  const [selectedBackground, setSelectedBackground] = useState<string>();
-  const [selectedCannon, setSelectedCannon] = useState<string>();
+  const [selectedBackground, setSelectedBackground] = useState<AssetImage>();
+  const [selectedCannon, setSelectedCannon] = useState<AssetImage>();
 
   if (isFetching) return <LoadingComponent />;
 
-  const backgrounds = assets.data.filter((item) => item.includes("/bg/"));
-  const cannons = assets.data.filter((item) => item.includes("/cannon/"));
+  const assets = assetsResponse.data.map((img) => {
+    const isZip = img.endsWith(".zip");
+    const imgSrc = isZip ? img.replace(/\.zip$/, ".png") : img;
+    return { url: img, imgSrc };
+  });
 
-  if(backgrounds.length && !selectedBackground) setSelectedBackground(backgrounds[0]);
-  if(cannons.length && !selectedCannon) setSelectedCannon(cannons[0]);
+  const backgrounds = assets.filter((item) => item.url.includes("/bg/"));
+  const balloons = assets.filter((item) => item.url.includes("/balloon/"));
+  const cannons = assets.filter((item) => item.url.includes("/cannon/"));
+
+  if (backgrounds.length && !selectedBackground) setSelectedBackground(backgrounds[0]);
+  if (cannons.length && !selectedCannon) setSelectedCannon(cannons[0]);
 
   return (
     <EditorScene>
@@ -50,7 +59,7 @@ export const WordBalloon = () => {
               {assets && (
                 <>
                   <img
-                    src={selectedBackground}
+                    src={selectedBackground?.imgSrc}
                     style={{
                       width: "calc(100% - 16px)",
                       height: "70%",
@@ -61,7 +70,7 @@ export const WordBalloon = () => {
                   />
 
                   <img
-                    src={selectedCannon}
+                    src={selectedCannon?.imgSrc}
                     style={{
                       width: "100px",
                       height: "100px",
@@ -77,6 +86,7 @@ export const WordBalloon = () => {
             <Grid item xs={3}>
               {assets && (
                 <>
+                  <BalloonColor imgs={balloons} />
                   <ImageSelect
                     label="Cannon shape"
                     imgs={cannons}

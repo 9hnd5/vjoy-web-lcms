@@ -3,6 +3,7 @@ import { blueGrey, orange } from "@mui/material/colors";
 import { styled } from "@mui/material/styles";
 
 import { upperCase } from "lodash";
+import { AssetImage } from "../wordBalloonType";
 
 interface StyledImageItemProps extends ImageListItemProps {
   selected?: boolean;
@@ -25,10 +26,10 @@ const ImageItem = styled(ImageListItem, {
 
 type ImageSelectProps = {
   label: string;
-  selectedImg?: string;
-  imgs: string[];
+  selectedImg?: AssetImage;
+  imgs: AssetImage[];
   viewRow?: boolean;
-  onChange: (value: string) => void;
+  onChange: (value: AssetImage) => void;
 };
 
 export const ImageSelect = ({ label, selectedImg, imgs, viewRow, onChange }: ImageSelectProps) => {
@@ -63,10 +64,10 @@ export const ImageSelect = ({ label, selectedImg, imgs, viewRow, onChange }: Ima
           }}
         >
           {imgs &&
-            imgs.map((elem: string, idx: number) => {
+            imgs.map((elem: AssetImage, idx: number) => {
               return (
-                <ImageItem key={idx} selected={selectedImg === elem} onClick={() => onChange(elem)}>
-                  <img src={elem} style={{ maxHeight: "100px", objectFit: "cover" }} />
+                <ImageItem key={idx} selected={selectedImg?.url === elem.url} onClick={() => onChange(elem)}>
+                  <img src={elem.imgSrc} style={{ maxHeight: "100px", objectFit: "cover" }} />
                 </ImageItem>
               );
             })}
