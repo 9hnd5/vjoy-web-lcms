@@ -66,7 +66,7 @@ export const ImageSelect = ({ label, selectedImg, imgs, viewRow, onChange }: Ima
           {imgs &&
             imgs.map((elem: AssetImage, idx: number) => {
               return (
-                <ImageItem key={idx} selected={selectedImg === elem} onClick={() => onChange(elem)}>
+                <ImageItem key={idx} selected={selectedImg?.url === elem.url} onClick={() => onChange(elem)}>
                   <img src={elem.imgSrc} style={{ maxHeight: "100px", objectFit: "cover" }} />
                 </ImageItem>
               );

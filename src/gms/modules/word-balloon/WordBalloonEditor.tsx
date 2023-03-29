@@ -12,9 +12,9 @@ import { ImageSelect } from "./components/ImageSelect";
 import { BalloonColor } from "./components/BalloonColor";
 import { AssetImage } from "./wordBalloonType";
 
-export const WordBalloon = () => {
+export const WordBalloonEditor = () => {
   // const value = useAppSelector(selectValue);
-  const { data = { data: [] }, isFetching } = useGetAssetsQuery({
+  const { data: assetsResponse = { data: [] }, isFetching } = useGetAssetsQuery({
     bucket: ASSET_BUCKET,
     folder: ASSET_FOLDER.WORD_BALLOON,
   });
@@ -23,12 +23,9 @@ export const WordBalloon = () => {
 
   if (isFetching) return <LoadingComponent />;
 
-  const assets = data.data.map((img) => {
-    const isZip = img.endsWith(".zip"); // check if it's a zip file
-
-    // replace zip extension with png
+  const assets = assetsResponse.data.map((img) => {
+    const isZip = img.endsWith(".zip");
     const imgSrc = isZip ? img.replace(/\.zip$/, ".png") : img;
-
     return { url: img, imgSrc };
   });
 
