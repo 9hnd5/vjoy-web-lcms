@@ -3,6 +3,7 @@ import { blueGrey, orange } from "@mui/material/colors";
 import { styled } from "@mui/material/styles";
 
 import { upperCase } from "lodash";
+import { WORD_ON_BALLOON } from "../wordBalloonContant";
 import { AssetImage } from "../wordBalloonType";
 
 const ImageContainer = styled("div")(() => ({
@@ -63,7 +64,7 @@ export const BalloonColor = ({ imgs }: BalloonColorProps) => {
                     color: "#fff",
                   }}
                 >
-                  A
+                  {WORD_ON_BALLOON}
                 </Typography>
               </ImageItem>
             ))}
