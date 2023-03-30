@@ -37,7 +37,7 @@ export const WordBalloonEditor = () => {
   if (cannons.length && !selectedCannon) setSelectedCannon(cannons[0]);
 
   const handleSubmitForm: SubmitHandler<FormType> = async (formData) => {
-    const data = { ...formData, curriculumns: await csvToJson<Curriculum>(formData.curriculumns[0]) };
+    const data = { ...formData, curriculum: await csvToJson<Curriculum>(formData.curriculum[0]) };
   };
 
   return (
@@ -118,7 +118,7 @@ export const WordBalloonEditor = () => {
               )}
             </Grid>
             <Grid item xs={12}>
-              <TextField fullWidth type="file" size="small" {...register("curriculumns")} />
+              <TextField fullWidth type="file" size="small" {...register("curriculum")} />
             </Grid>
           </Grid>
         </Box>

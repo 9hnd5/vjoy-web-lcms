@@ -16,7 +16,7 @@ export type Asset = {
   behavior: number;
 };
 export type FormType = {
-  curriculumns: FileList;
+  curriculum: FileList;
   unitId: number;
   name: string;
   gameType: string;
