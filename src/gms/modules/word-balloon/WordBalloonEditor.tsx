@@ -1,18 +1,36 @@
-import { Box, Grid, TextField, Button, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  KeyboardSensor,
+  MouseSensor,
+  rectIntersection,
+  TouchSensor,
+  useSensor,
+  useSensors
+} from "@dnd-kit/core";
+import { restrictToWindowEdges } from "@dnd-kit/modifiers";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
 import { EditorScene } from "gms/components/EditorScene";
 import LoadingComponent from "gms/components/LoadingComponent";
+import { useAppDispatch } from "gms/hooks/useAppDispatch";
+import { useAppSelector } from "gms/hooks/useAppSelector";
 import { useGetAssetsQuery } from "gms/services/assetService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
-import { useState } from "react";
-import Board from "./components/Board";
-import { ImageSelect } from "./components/ImageSelect";
-import { BalloonColor } from "./components/BalloonColor";
-import { AssetImage, Curriculum, FormType } from "./wordBalloonType";
 import { csvToJson } from "gms/ultils/file";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { BalloonColor } from "./components/BalloonColor";
+import { BalloonDraggable } from "./components/BalloonDraggable";
+import { Board } from "./components/Board";
+import { ImageSelect } from "./components/ImageSelect";
+import { assignBalloon, removeBalloon, selectAllAssignedBalloons } from "./wordBalloonSlice";
+import { AssetImage, AssignmentsMap, Balloon, Curriculum, FormType } from "./wordBalloonType";
 
 export const WordBalloonEditor = () => {
+  const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<FormType>();
   const { data: assetsResponse = { data: [] }, isFetching } = useGetAssetsQuery({
     bucket: ASSET_BUCKET,
@@ -21,110 +39,129 @@ export const WordBalloonEditor = () => {
   const [selectedBackground, setSelectedBackground] = useState<AssetImage>();
   const [selectedCannon, setSelectedCannon] = useState<AssetImage>();
 
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const assignmentsMap = useAppSelector(selectAllAssignedBalloons);
+
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
+
   if (isFetching) return <LoadingComponent />;
 
   const assets = assetsResponse.data.map((img) => {
     const isZip = img.endsWith(".zip");
     const imgSrc = isZip ? img.replace(/\.zip$/, ".png") : img;
-    return { url: img, imgSrc };
+    const filename = imgSrc.substring(imgSrc.lastIndexOf("/") + 1);
+    const name = filename.substring(0, filename.lastIndexOf("."));
+    return { url: img, imgSrc, name };
   });
 
-  const backgrounds = assets.filter((item) => item.url.includes("/bg/"));
-  const balloons = assets.filter((item) => item.url.includes("/balloon/"));
-  const cannons = assets.filter((item) => item.url.includes("/cannon/"));
+  const backgroundAssets = assets.filter((item) => item.url.includes("/bg/"));
+  const balloonAssets = assets.filter((item) => item.url.includes("/balloon/"));
+  const cannonAssets = assets.filter((item) => item.url.includes("/cannon/"));
 
-  if (backgrounds.length && !selectedBackground) setSelectedBackground(backgrounds[0]);
-  if (cannons.length && !selectedCannon) setSelectedCannon(cannons[0]);
+  if (backgroundAssets.length && !selectedBackground) setSelectedBackground(backgroundAssets[0]);
+  if (cannonAssets.length && !selectedCannon) setSelectedCannon(cannonAssets[0]);
 
   const handleSubmitForm: SubmitHandler<FormType> = async (formData) => {
-    const data = { ...formData, curriculum: await csvToJson<Curriculum>(formData.curriculum[0]) };
+    const balloons = transferMapToBalloonAssets(assignmentsMap, balloonAssets);
+
+    const data = { ...formData, curriculum: await csvToJson<Curriculum>(formData.curriculum[0]), balloons };
   };
 
   return (
-    <EditorScene>
+    <EditorScene sx={{ height: "95vh" }}>
       <EditorScene.Left xs={2}></EditorScene.Left>
       <EditorScene.Mid xs={8}>
-        <Box sx={{ mt: 2, mb: 2 }}>
-          <Grid container spacing={1}>
-            <Grid item xs={3}>
-              <FormControl fullWidth>
-                <InputLabel size="small">Behavior</InputLabel>
-                <Select label="Behavior" size="small" {...register("difficulty")}>
-                  <MenuItem value={1}>Standing Still</MenuItem>
-                  <MenuItem value={2}>Horizontal</MenuItem>
-                  <MenuItem value={3}>Vertical</MenuItem>
-                  <MenuItem value={4}>Random</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid
-              item
-              xs={6}
-              sx={{
-                height: "80vh",
-                backgroundColor: lightBlue[300],
-                border: `solid 3px ${blueGrey[300]}`,
-                borderRadius: "10px",
-                overflow: "hidden",
-                position: "relative",
-              }}
+          <DndContext
+            sensors={sensors}
+            modifiers={[restrictToWindowEdges]}
+            collisionDetection={rectIntersection}
+            autoScroll={false}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <Box
+              sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", p: 1 }}
             >
-              <Board position="absolute" width="90%" top="25%" left="5%" zIndex="999" />
-              {assets && (
-                <>
-                  <img
-                    src={selectedBackground?.imgSrc}
-                    style={{
-                      width: "calc(100% - 16px)",
-                      height: "70%",
-                      objectFit: "cover",
-                      position: "absolute",
-                      bottom: "10%",
-                    }}
-                  />
+              <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, height: "90%" }}>
+                <Box sx={{ display: "flex", flexDirection: "column", width: "20%" }}>
+                  <FormControl fullWidth>
+                    <InputLabel size="small">Behavior</InputLabel>
+                    <Select label="Behavior" size="small" {...register("difficulty")}>
+                      <MenuItem value={1}>Standing Still</MenuItem>
+                      <MenuItem value={2}>Horizontal</MenuItem>
+                      <MenuItem value={3}>Vertical</MenuItem>
+                      <MenuItem value={4}>Random</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: "50%",
+                    backgroundColor: lightBlue[300],
+                    border: `solid 3px ${blueGrey[300]}`,
+                    borderRadius: "10px",
+                  }}
+                >
+                  <Board position="absolute" width="90%" top="25%" left="5%" zIndex="999" assets={balloonAssets} />
+                  {assets && (
+                    <>
+                      <img
+                        src={selectedBackground?.imgSrc}
+                        style={{
+                          width: "calc(100% - 16px)",
+                          height: "75%",
+                          objectFit: "cover",
+                          position: "absolute",
+                          bottom: "10%",
+                          left: "8px",
+                        }}
+                      />
 
-                  <img
-                    src={selectedCannon?.imgSrc}
-                    style={{
-                      width: "100px",
-                      height: "100px",
-                      objectFit: "cover",
-                      position: "absolute",
-                      bottom: "10%",
-                      left: "calc(50% - 50px)",
-                    }}
-                  />
-                </>
-              )}
-            </Grid>
-            <Grid item xs={3}>
-              {assets && (
-                <>
-                  <BalloonColor imgs={balloons} />
-                  <ImageSelect
-                    label="Cannon shape"
-                    imgs={cannons}
-                    selectedImg={selectedCannon}
-                    viewRow
-                    onChange={setSelectedCannon}
-                  />
-                  <ImageSelect
-                    label="background theme"
-                    imgs={backgrounds}
-                    selectedImg={selectedBackground}
-                    onChange={setSelectedBackground}
-                  />
-                </>
-              )}
-            </Grid>
-            <Grid item xs={12}>
+                      <img
+                        src={selectedCannon?.imgSrc}
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          objectFit: "cover",
+                          position: "absolute",
+                          bottom: "10%",
+                          left: "calc(50% - 50px)",
+                        }}
+                      />
+                    </>
+                  )}
+                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", width: "20%" }}>
+                  {assets && (
+                    <>
+                      <BalloonColor imgs={balloonAssets} />
+                      <ImageSelect
+                        label="Cannon shape"
+                        imgs={cannonAssets}
+                        selectedImg={selectedCannon}
+                        viewRow
+                        onChange={setSelectedCannon}
+                      />
+                      <ImageSelect
+                        label="background theme"
+                        imgs={backgroundAssets}
+                        selectedImg={selectedBackground}
+                        onChange={setSelectedBackground}
+                      />
+                    </>
+                  )}
+                </Box>
+
+                <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
+              </Box>
+
               <TextField fullWidth type="file" size="small" {...register("curriculum")} />
-            </Grid>
-          </Grid>
-        </Box>
+            </Box>
+          </DndContext>
       </EditorScene.Mid>
       <EditorScene.Right xs={2}>
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", p: 1 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <FormControl>
               <InputLabel size="small">Difficulty</InputLabel>
@@ -151,4 +188,50 @@ export const WordBalloonEditor = () => {
       </EditorScene.Right>
     </EditorScene>
   );
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id.toString());
+  }
+
+  function removeAssignment(id: string) {
+    dispatch(removeBalloon(id));
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveId(null);
+
+    const { active, over, collisions } = event;
+
+    const containsCollisionWithRemoveDroppable = collisions?.some((collision) => collision.id === "remove-assignment");
+
+    if (over) {
+      if (containsCollisionWithRemoveDroppable) {
+        removeAssignment(active.id.toString());
+      } else if (over.id && active.id) {
+        dispatch(assignBalloon({ balloonId: active.id.toString(), boardId: over.id.toString() }));
+      }
+    } else {
+      if (assignmentsMap[active.id]) {
+        removeAssignment(active.id.toString());
+      }
+    }
+  }
+
+  function transferMapToBalloonAssets(a: AssignmentsMap, b: AssetImage[]): Balloon[] {
+    const output: Balloon[] = [];
+
+    for (const [key, value] of Object.entries(a)) {
+      if (value === undefined) {
+        continue;
+      }
+
+      const [type, index] = key.split("-");
+      const position = value;
+      const { name } = b[parseInt(index)];
+
+      output.push({ type, position, name });
+    }
+
+    return output;
+  }
 };

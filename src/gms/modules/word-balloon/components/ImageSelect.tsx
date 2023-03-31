@@ -59,8 +59,8 @@ export const ImageSelect = ({ label, selectedImg, imgs, viewRow, onChange }: Ima
             ...(viewRow && {
               gridAutoFlow: "column",
             }),
-            gridTemplateColumns: "repeat(auto-fill,minmax(100px,1fr)) !important",
-            gridAutoColumns: "minmax(100px, 1fr)",
+            gridTemplateColumns: "repeat(auto-fill,minmax(70px,1fr)) !important",
+            gridAutoColumns: "minmax(70px, 1fr)",
           }}
         >
           {imgs &&

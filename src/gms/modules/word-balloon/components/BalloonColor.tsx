@@ -1,10 +1,13 @@
-import { Grid, InputLabel, Typography } from "@mui/material";
+import { useDroppable } from "@dnd-kit/core";
+import { Grid, InputLabel } from "@mui/material";
 import { blueGrey, orange } from "@mui/material/colors";
 import { styled } from "@mui/material/styles";
+import { useAppSelector } from "gms/hooks/useAppSelector";
 
 import { upperCase } from "lodash";
-import { WORD_ON_BALLOON } from "../wordBalloonContant";
+import { selectAssignedIdCount } from "../wordBalloonSlice";
 import { AssetImage } from "../wordBalloonType";
+import { BalloonDraggable } from "./BalloonDraggable";
 
 const ImageContainer = styled("div")(() => ({
   border: `solid 3px ${blueGrey[300]}`,
@@ -13,22 +16,15 @@ const ImageContainer = styled("div")(() => ({
   overflow: "hidden",
 }));
 
-const ImageItem = styled(Grid)(() => ({
-  margin: "5px",
-  position: "relative",
-  display: "inline-block",
-  "&:hover": {
-    cursor: "pointer",
-    opacity: 0.8,
-    boxShadow: `0px 5px 15px ${blueGrey.A400}`,
-  },
-}));
-
 type BalloonColorProps = {
   imgs: AssetImage[];
 };
 
 export const BalloonColor = ({ imgs }: BalloonColorProps) => {
+  const { setNodeRef } = useDroppable({
+    id: "remove-assignment",
+  });
+  const countIds = useAppSelector(selectAssignedIdCount);
   return (
     <>
       <InputLabel
@@ -41,32 +37,16 @@ export const BalloonColor = ({ imgs }: BalloonColorProps) => {
       >
         {upperCase("balloon color")}
       </InputLabel>
-      <ImageContainer>
+      <ImageContainer ref={setNodeRef}>
         <Grid container sx={{ overflowX: "auto" }}>
           <Grid item container direction="row" wrap="nowrap">
             {imgs.map((image, index) => (
-              <ImageItem item key={index}>
-                <img src={image.imgSrc} style={{ height: "40px", objectFit: "cover" }} />
-              </ImageItem>
+              <BalloonDraggable key={`E-${index}`} id={`E-${index}-${(`E-${index}-`)}`} assets={imgs} />
             ))}
           </Grid>
           <Grid item container direction="row" wrap="nowrap">
             {imgs.map((image, index) => (
-              <ImageItem item key={index}>
-                <img src={image.imgSrc} style={{ height: "40px", objectFit: "cover", display: "block" }} />
-                <Typography
-                  variant="button"
-                  sx={{
-                    position: "absolute",
-                    top: "35%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    color: "#fff",
-                  }}
-                >
-                  {WORD_ON_BALLOON}
-                </Typography>
-              </ImageItem>
+              <BalloonDraggable key={`W-${index}`} id={`W-${index}-${countIds(`W-${index}-`)}`} assets={imgs} />
             ))}
           </Grid>
         </Grid>
