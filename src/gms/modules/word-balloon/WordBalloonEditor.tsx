@@ -8,28 +8,29 @@ import {
   rectIntersection,
   TouchSensor,
   useSensor,
-  useSensors,
+  useSensors
 } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
 import { EditorScene } from "gms/components/EditorScene";
 import LoadingComponent from "gms/components/LoadingComponent";
+import { useAppDispatch } from "gms/hooks/useAppDispatch";
+import { useAppSelector } from "gms/hooks/useAppSelector";
 import { useGetAssetsQuery } from "gms/services/assetService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
 import { csvToJson } from "gms/ultils/file";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { AssignmentsContext } from "./components/AssignmentsContext";
 import { BalloonColor } from "./components/BalloonColor";
 import { BalloonDraggable } from "./components/BalloonDraggable";
-import Board from "./components/Board";
+import { Board } from "./components/Board";
 import { ImageSelect } from "./components/ImageSelect";
-import { Asset, AssetImage, Balloon, Curriculum, FormType } from "./wordBalloonType";
-
-type AssignmentsMap = { [key: string]: string | undefined };
+import { assignBalloon, removeBalloon, selectAllAssignedBalloons } from "./wordBalloonSlice";
+import { AssetImage, AssignmentsMap, Balloon, Curriculum, FormType } from "./wordBalloonType";
 
 export const WordBalloonEditor = () => {
+  const dispatch = useAppDispatch();
   const { register, handleSubmit } = useForm<FormType>();
   const { data: assetsResponse = { data: [] }, isFetching } = useGetAssetsQuery({
     bucket: ASSET_BUCKET,
@@ -39,7 +40,7 @@ export const WordBalloonEditor = () => {
   const [selectedCannon, setSelectedCannon] = useState<AssetImage>();
 
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [assignmentsMap, setAssignmentsMap] = useState<AssignmentsMap>({});
+  const assignmentsMap = useAppSelector(selectAllAssignedBalloons);
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
 
@@ -70,7 +71,6 @@ export const WordBalloonEditor = () => {
     <EditorScene sx={{ height: "95vh" }}>
       <EditorScene.Left xs={2}></EditorScene.Left>
       <EditorScene.Mid xs={8}>
-        <AssignmentsContext.Provider value={assignmentsMap}>
           <DndContext
             sensors={sensors}
             modifiers={[restrictToWindowEdges]}
@@ -159,7 +159,6 @@ export const WordBalloonEditor = () => {
               <TextField fullWidth type="file" size="small" {...register("curriculum")} />
             </Box>
           </DndContext>
-        </AssignmentsContext.Provider>
       </EditorScene.Mid>
       <EditorScene.Right xs={2}>
         <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", p: 1 }}>
@@ -195,7 +194,7 @@ export const WordBalloonEditor = () => {
   }
 
   function removeAssignment(id: string) {
-    setAssignmentsMap((current) => ({ ...current, [id]: undefined } as AssignmentsMap));
+    dispatch(removeBalloon(id));
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -209,14 +208,7 @@ export const WordBalloonEditor = () => {
       if (containsCollisionWithRemoveDroppable) {
         removeAssignment(active.id.toString());
       } else if (over.id && active.id) {
-        setAssignmentsMap((current) => {
-          const keyToRemove = Object.keys(current).find((k) => current[k] === over.id);
-          const updatedItems = keyToRemove ? { ...current, [keyToRemove]: undefined } : current;
-          return {
-            ...updatedItems,
-            [active.id]: over.id,
-          } as AssignmentsMap;
-        });
+        dispatch(assignBalloon({ balloonId: active.id.toString(), boardId: over.id.toString() }));
       }
     } else {
       if (assignmentsMap[active.id]) {

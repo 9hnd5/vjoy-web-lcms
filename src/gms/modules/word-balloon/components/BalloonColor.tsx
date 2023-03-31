@@ -2,10 +2,11 @@ import { useDroppable } from "@dnd-kit/core";
 import { Grid, InputLabel } from "@mui/material";
 import { blueGrey, orange } from "@mui/material/colors";
 import { styled } from "@mui/material/styles";
+import { useAppSelector } from "gms/hooks/useAppSelector";
 
 import { upperCase } from "lodash";
+import { selectAssignedIdCount } from "../wordBalloonSlice";
 import { AssetImage } from "../wordBalloonType";
-import { useAssignedIdCount } from "./AssignmentsContext";
 import { BalloonDraggable } from "./BalloonDraggable";
 
 const ImageContainer = styled("div")(() => ({
@@ -23,7 +24,7 @@ export const BalloonColor = ({ imgs }: BalloonColorProps) => {
   const { setNodeRef } = useDroppable({
     id: "remove-assignment",
   });
-  const countIds = useAssignedIdCount();
+  const countIds = useAppSelector(selectAssignedIdCount);
   return (
     <>
       <InputLabel
@@ -40,7 +41,7 @@ export const BalloonColor = ({ imgs }: BalloonColorProps) => {
         <Grid container sx={{ overflowX: "auto" }}>
           <Grid item container direction="row" wrap="nowrap">
             {imgs.map((image, index) => (
-              <BalloonDraggable key={`E-${index}`} id={`E-${index}-${countIds(`E-${index}-`)}`} assets={imgs} />
+              <BalloonDraggable key={`E-${index}`} id={`E-${index}-${(`E-${index}-`)}`} assets={imgs} />
             ))}
           </Grid>
           <Grid item container direction="row" wrap="nowrap">

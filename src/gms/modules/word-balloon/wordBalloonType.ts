@@ -31,3 +31,5 @@ export type FormType = {
   gameType: string;
   difficulty: number;
 };
+
+export type AssignmentsMap = { [key: string]: string | undefined };

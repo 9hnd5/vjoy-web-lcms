@@ -1,13 +1,13 @@
 import { Box, BoxProps } from "@mui/material";
 import { useRef } from "react";
 import { AssetImage } from "../wordBalloonType";
-import BoardSquare from "./BoardSquare";
+import { BoardSquare } from "./BoardSquare";
 
 interface BoardProps extends BoxProps {
   assets: AssetImage[];
 }
 
-const Board = ({ assets, ...props }: BoardProps) => {
+export const Board = ({ assets, ...props }: BoardProps) => {
   const ref = useRef<HTMLInputElement>(null);
   const renderBoard = () => {
     const board = [];
@@ -38,5 +38,3 @@ const Board = ({ assets, ...props }: BoardProps) => {
     </Box>
   );
 };
-
-export default Board;
