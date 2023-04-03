@@ -222,7 +222,7 @@ export const WordBalloonEditor = () => {
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel size="small">Level</InputLabel>
+              <InputLabel size="small">Unit</InputLabel>
               <Select label="Unit" size="small" {...register("unitId")} native disabled>
                 <option key={1} value={1}>
                   School thing
@@ -230,7 +230,7 @@ export const WordBalloonEditor = () => {
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel size="small">Level</InputLabel>
+              <InputLabel size="small">Lesson List</InputLabel>
               <Select label="Lesson list" size="small" {...register("gameType")} native disabled>
                 {Object.entries(GAME_TYPE).map(([key, value]) => (
                   <option key={key} value={key}>

@@ -8,7 +8,7 @@ const lessonService = baseService.injectEndpoints({
       query: (params) => ({
         url,
         method: "GET",
-        params,
+        params: { filter: JSON.stringify(params) },
       }),
       providesTags: ["LESSONS"],
     }),
