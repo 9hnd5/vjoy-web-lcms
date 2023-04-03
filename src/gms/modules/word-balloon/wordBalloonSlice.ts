@@ -40,10 +40,14 @@ export const counterSlice = createSlice({
       const current = state.assignmentsMap;
       state.assignmentsMap = { ...current, [action.payload]: undefined };
     },
+    removeAllBalloon: (state) => {
+      state.assignmentsMap = {};
+    },
   },
 });
 
-export const { increment, decrement, incrementByAmount, assignBalloon, removeBalloon } = counterSlice.actions;
+export const { increment, decrement, incrementByAmount, assignBalloon, removeBalloon, removeAllBalloon } =
+  counterSlice.actions;
 
 export const selectValue = (state: RootState) => state.wordBalloon.value;
 export const selectAllAssignedBalloons = (state: RootState) => state.wordBalloon.assignmentsMap;

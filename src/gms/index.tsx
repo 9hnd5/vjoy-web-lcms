@@ -4,8 +4,9 @@ import { Provider } from "react-redux";
 import { Route, Routes } from "react-router-dom";
 import { WordBalloonEditor } from "./modules/word-balloon/WordBalloonEditor";
 import { store } from "./store";
+import { Notification } from "./components/Notification";
 
-const theme = createTheme({ typography: { fontFamily: "SVN-Gotham", fontSize: 16 } });
+const theme = createTheme({ typography: { fontFamily: "SVN-Gotham" } });
 
 export const Gms = () => {
   return (
@@ -15,6 +16,7 @@ export const Gms = () => {
           <Routes>
             <Route path="/word-balloon" element={<WordBalloonEditor />} />
           </Routes>
+          <Notification />
         </Container>
       </ThemeProvider>
     </Provider>

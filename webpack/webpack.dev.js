@@ -1,15 +1,16 @@
 const path = require("path");
 const webpack = require("webpack");
+const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
 module.exports = {
   mode: "development",
   devServer: {
-    hot: "only",
+    hot: true,
     open: true,
     compress: true,
     port: 3000,
     historyApiFallback: true,
-    watchFiles: ["src/**/*"],
+    // watchFiles: ["src/**/*"],
     static: path.resolve(process.cwd(), "dll"),
     devMiddleware: {
       writeToDisk: false,
@@ -30,6 +31,7 @@ module.exports = {
     ],
   },
   plugins: [
+    new ReactRefreshWebpackPlugin(),
     new webpack.DllReferencePlugin({
       manifest: require(path.resolve(process.cwd(), "dll/ahooks.manifest.json")),
     }),

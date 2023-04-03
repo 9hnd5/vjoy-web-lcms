@@ -8,30 +8,55 @@ import {
   rectIntersection,
   TouchSensor,
   useSensor,
-  useSensors
+  useSensors,
 } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  Select,
+  TextField,
+} from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
 import { EditorScene } from "gms/components/EditorScene";
 import LoadingComponent from "gms/components/LoadingComponent";
 import { useAppDispatch } from "gms/hooks/useAppDispatch";
 import { useAppSelector } from "gms/hooks/useAppSelector";
+import { useNotification } from "gms/hooks/useNotification";
 import { useGetAssetsQuery } from "gms/services/assetService";
+import {
+  Balloon,
+  Curriculum,
+  GAME_TYPE,
+  LESSON_DIFFICULTY,
+  LESSON_STATUS,
+  useCreateLessonMutation,
+  useLazyGetLessonQuery,
+  useUpdateLessonMutation,
+} from "gms/services/lessonService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
 import { csvToJson } from "gms/ultils/file";
-import { useState } from "react";
+import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { BalloonColor } from "./components/BalloonColor";
 import { BalloonDraggable } from "./components/BalloonDraggable";
 import { Board } from "./components/Board";
 import { ImageSelect } from "./components/ImageSelect";
-import { assignBalloon, removeBalloon, selectAllAssignedBalloons } from "./wordBalloonSlice";
-import { AssetImage, AssignmentsMap, Balloon, Curriculum, FormType } from "./wordBalloonType";
+import { LessonModal } from "./components/LessonModal";
+import { assignBalloon, removeAllBalloon, removeBalloon, selectAllAssignedBalloons } from "./wordBalloonSlice";
+import { AssetImage, AssignmentsMap, FormType } from "./wordBalloonType";
 
 export const WordBalloonEditor = () => {
   const dispatch = useAppDispatch();
-  const { register, handleSubmit } = useForm<FormType>();
+
+  const notify = useNotification();
+
   const { data: assetsResponse = { data: [] }, isFetching } = useGetAssetsQuery({
     bucket: ASSET_BUCKET,
     folder: ASSET_FOLDER.WORD_BALLOON,
@@ -43,6 +68,32 @@ export const WordBalloonEditor = () => {
   const assignmentsMap = useAppSelector(selectAllAssignedBalloons);
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
+
+  const [open, setOpen] = useState(false);
+
+  const [openConfirm, setOpenConfirm] = useState(false);
+
+  const [getLesson] = useLazyGetLessonQuery();
+
+  const {
+    handleSubmit,
+    register,
+    reset,
+    trigger,
+    getValues,
+    setValue,
+    setError,
+    formState: { errors },
+  } = useForm<FormType>({
+    defaultValues: {
+      unitId: 1,
+      gameType: GAME_TYPE.WORD_BALLOON,
+    },
+  });
+
+  const [createLesson, { isLoading: isCreating }] = useCreateLessonMutation();
+
+  const [updateLesson, { isLoading: isUpdating }] = useUpdateLessonMutation();
 
   if (isFetching) return <LoadingComponent />;
 
@@ -63,14 +114,99 @@ export const WordBalloonEditor = () => {
 
   const handleSubmitForm: SubmitHandler<FormType> = async (formData) => {
     const balloons = transferMapToBalloonAssets(assignmentsMap, balloonAssets);
+    const asset = {
+      balloons,
+      bg: selectedBackground!.name,
+      cannon: selectedCannon!.name,
+      behavior: formData.behavior,
+      bundleUrl: "https://storage.googleapis.com/vjoy-game-asset-dev/WORD_BALLOON.bundle",
+    };
 
-    const data = { ...formData, curriculum: await csvToJson<Curriculum>(formData.curriculum[0]), balloons };
+    const fileExtension = formData.curriculum[0].name.split(".").at(-1);
+    if (fileExtension !== "csv") return setError("curriculum", { message: "Only Support CSV file extendsion" });
+    const curriculum = await csvToJson<Curriculum>(formData.curriculum[0]);
+    const data = {
+      ...formData,
+      asset,
+      curriculum,
+    };
+
+    try {
+      //Publish case
+      if (formData.id && formData.status) {
+        await updateLesson(data);
+        return notify.success({ content: "Publish Succeed" });
+      }
+
+      //Update case
+      if (formData.id) {
+        await updateLesson(data);
+        notify.success({ content: "Update Succeed" });
+      } else {
+        //Create case
+        await createLesson(data);
+        notify.success({ content: "Create Succeed" });
+      }
+
+      handleToggleConfirm();
+    } catch (err) {
+      notify.error({ content: "There was an error" });
+    }
+  };
+
+  const handleToggleLesson = () => setOpen(!open);
+
+  const handleToggleConfirm = () => setOpenConfirm(!openConfirm);
+
+  const handleLessonSelect = async (id: number) => {
+    const { data: { data: lesson } = {} } = await getLesson(id);
+    if (!lesson) return;
+
+    reset({
+      id: lesson.id,
+      behavior: lesson.asset.behavior,
+      curriculum: {} as any,
+      difficulty: lesson.difficulty,
+      gameType: lesson.gameType,
+      name: lesson.name,
+      unitId: lesson.unitId,
+    });
+
+    dispatch(removeAllBalloon());
+
+    lesson.asset.balloons
+      .filter((x) => x.type === "E")
+      .forEach((balloon, indexCount) => {
+        const indexName = balloonAssets.findIndex((x) => x.name === balloon.name);
+        dispatch(assignBalloon({ balloonId: `E-${indexName}-${indexCount}-}`, boardId: balloon.position }));
+      });
+
+    lesson.asset.balloons
+      .filter((x) => x.type === "W")
+      .forEach((balloon, indexCount) => {
+        const indexName = balloonAssets.findIndex((x) => x.name === balloon.name);
+        dispatch(assignBalloon({ balloonId: `W-${indexName}-${indexCount}-}`, boardId: balloon.position }));
+      });
+
+    const backgroud = backgroundAssets.find((x) => x.name === lesson.asset.bg);
+    setSelectedBackground(backgroud);
+    const cannon = cannonAssets.find((x) => x.name === lesson.asset.cannon);
+    setSelectedCannon(cannon);
+  };
+
+  const handlePubic = async () => {
+    const formValue = getValues();
+    if (formValue.id) {
+      setValue("status", LESSON_STATUS.PUBLISHED);
+      if (await trigger()) handleSubmit(handleSubmitForm)();
+    }
   };
 
   return (
-    <EditorScene sx={{ height: "95vh" }}>
-      <EditorScene.Left xs={2}></EditorScene.Left>
-      <EditorScene.Mid xs={8}>
+    <React.Fragment>
+      <EditorScene sx={{ height: "95vh" }}>
+        <EditorScene.Left xs={2}></EditorScene.Left>
+        <EditorScene.Mid xs={8}>
           <DndContext
             sensors={sensors}
             modifiers={[restrictToWindowEdges]}
@@ -86,11 +222,16 @@ export const WordBalloonEditor = () => {
                 <Box sx={{ display: "flex", flexDirection: "column", width: "20%" }}>
                   <FormControl fullWidth>
                     <InputLabel size="small">Behavior</InputLabel>
-                    <Select label="Behavior" size="small" {...register("difficulty")}>
-                      <MenuItem value={1}>Standing Still</MenuItem>
-                      <MenuItem value={2}>Horizontal</MenuItem>
-                      <MenuItem value={3}>Vertical</MenuItem>
-                      <MenuItem value={4}>Random</MenuItem>
+                    <Select
+                      label="Behavior"
+                      size="small"
+                      {...register("behavior", { required: "This field is required", valueAsNumber: true })}
+                      native
+                    >
+                      <option value={1}>STANDING STILL</option>
+                      <option value={2}>HORIZONTAL</option>
+                      <option value={3}>VERTICAL</option>
+                      <option value={4}>RANDOM</option>
                     </Select>
                   </FormControl>
                 </Box>
@@ -156,37 +297,75 @@ export const WordBalloonEditor = () => {
                 <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
               </Box>
 
-              <TextField fullWidth type="file" size="small" {...register("curriculum")} />
+              <TextField
+                fullWidth
+                label="Curriculum"
+                type="file"
+                size="small"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                error={!!errors.curriculum}
+                helperText={errors.curriculum ? errors.curriculum.message : " "}
+                {...register("curriculum", { required: "This field is required" })}
+              />
             </Box>
           </DndContext>
-      </EditorScene.Mid>
-      <EditorScene.Right xs={2}>
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", p: 1 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <FormControl>
-              <InputLabel size="small">Difficulty</InputLabel>
-              <Select label="Difficulty" size="small" {...register("difficulty")}>
-                <MenuItem value={1}>Easy</MenuItem>
-                <MenuItem value={2}>Normal</MenuItem>
-                <MenuItem value={3}>Hard</MenuItem>
-                <MenuItem value={4}>Very Hard</MenuItem>
-              </Select>
-            </FormControl>
+        </EditorScene.Mid>
+        <EditorScene.Right xs={2}>
+          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", p: 1 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <FormControl>
+                <InputLabel size="small">Difficulty</InputLabel>
+                <Select
+                  label="Difficulty"
+                  size="small"
+                  {...register("difficulty", { required: "This field is required", valueAsNumber: true })}
+                  native
+                >
+                  {Object.entries(LESSON_DIFFICULTY).map(([key, value]) => (
+                    <option key={key} value={value}>
+                      {key.toUpperCase()}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Button color="primary" variant="contained" onClick={handleToggleLesson}>
+                Load
+              </Button>
+              <Button color="primary" variant="contained" onClick={handleToggleConfirm}>
+                Save
+              </Button>
+              <Button color="primary" variant="contained" disabled={isUpdating} onClick={handlePubic}>
+                Publish
+              </Button>
+            </Box>
           </Box>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Button color="primary" variant="contained">
-              Load
-            </Button>
-            <Button color="primary" variant="contained" onClick={handleSubmit(handleSubmitForm)}>
-              Save
-            </Button>
-            <Button color="primary" variant="contained">
-              Public
-            </Button>
-          </Box>
-        </Box>
-      </EditorScene.Right>
-    </EditorScene>
+        </EditorScene.Right>
+      </EditorScene>
+      <LessonModal open={open} onClose={handleToggleLesson} onSelect={handleLessonSelect} />
+      <Dialog open={openConfirm} onClose={handleToggleConfirm}>
+        <DialogTitle>Confirm Save</DialogTitle>
+        <DialogContent>
+          <TextField
+            size="small"
+            label="Name"
+            fullWidth
+            margin="dense"
+            error={!!errors.name}
+            helperText={errors.name ? errors.name.message : " "}
+            {...register("name", { required: "This field is required" })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" disabled={isCreating || isUpdating} onClick={handleSubmit(handleSubmitForm)}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </React.Fragment>
   );
 
   function handleDragStart(event: DragStartEvent) {
@@ -203,7 +382,6 @@ export const WordBalloonEditor = () => {
     const { active, over, collisions } = event;
 
     const containsCollisionWithRemoveDroppable = collisions?.some((collision) => collision.id === "remove-assignment");
-
     if (over) {
       if (containsCollisionWithRemoveDroppable) {
         removeAssignment(active.id.toString());
