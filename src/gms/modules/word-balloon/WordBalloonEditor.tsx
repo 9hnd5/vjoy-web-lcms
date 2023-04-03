@@ -122,7 +122,7 @@ export const WordBalloonEditor = () => {
       bg: selectedBackground!.name,
       cannon: selectedCannon!.name,
       behavior: formData.behavior,
-      bundleUrl: "https://storage.googleapis.com/vjoy-game-asset-dev/WORD_BALLOON.bundle",
+      bundleUrl: "https://storage.googleapis.com/vjoy-game-asset-dev/.unity_bundle",
     };
 
     const fileExtension = formData.curriculum[0].name.split(".").at(-1);
