@@ -178,14 +178,14 @@ export const WordBalloonEditor = () => {
       .filter((x) => x.type === "E")
       .forEach((balloon, indexCount) => {
         const indexName = balloonAssets.findIndex((x) => x.name === balloon.name);
-        dispatch(assignBalloon({ balloonId: `E-${indexName}-${`E-${indexCount}-`}`, boardId: balloon.position }));
+        dispatch(assignBalloon({ balloonId: `E-${indexName}-${indexCount}-}`, boardId: balloon.position }));
       });
 
     lesson.asset.balloons
       .filter((x) => x.type === "W")
       .forEach((balloon, indexCount) => {
         const indexName = balloonAssets.findIndex((x) => x.name === balloon.name);
-        dispatch(assignBalloon({ balloonId: `W-${indexName}-${`W-${indexCount}-`}`, boardId: balloon.position }));
+        dispatch(assignBalloon({ balloonId: `W-${indexName}-${indexCount}-}`, boardId: balloon.position }));
       });
 
     const backgroud = backgroundAssets.find((x) => x.name === lesson.asset.bg);
