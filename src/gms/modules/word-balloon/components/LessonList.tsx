@@ -34,7 +34,9 @@ type Props = {
 
 export const LessonList = (props: Props) => {
   const { onSelect } = props;
-  const { data: { data } = { data: { rows: [], count: 0 } }, isLoading } = useGetLessonsQuery({});
+  const { data: { data } = { data: { rows: [], count: 0 } }, isLoading } = useGetLessonsQuery({
+    gameType: "WORD_BALLOON",
+  });
 
   return (
     <Box sx={{ height: 500, width: 500 }}>
