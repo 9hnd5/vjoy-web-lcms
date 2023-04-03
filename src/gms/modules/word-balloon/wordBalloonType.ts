@@ -16,6 +16,7 @@ export type FormType = {
   difficulty: number;
   behavior: number;
   asset: Asset;
+  levelId: string;
 };
 
 export type AssignmentsMap = { [key: string]: string | undefined };
