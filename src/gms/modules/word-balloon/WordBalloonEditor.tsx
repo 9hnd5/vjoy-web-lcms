@@ -40,6 +40,7 @@ import {
   useLazyGetLessonQuery,
   useUpdateLessonMutation,
 } from "gms/services/lessonService";
+import { useGetLevelsQuery } from "gms/services/levelService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
 import { csvToJson } from "gms/ultils/file";
 import React, { useState } from "react";
@@ -75,6 +76,7 @@ export const WordBalloonEditor = () => {
 
   const [getLesson] = useLazyGetLessonQuery();
 
+  const { data: { data: levels } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery({});
   const {
     handleSubmit,
     register,
@@ -87,6 +89,7 @@ export const WordBalloonEditor = () => {
   } = useForm<FormType>({
     defaultValues: {
       unitId: 1,
+      levelId: "eng-preA1",
       gameType: GAME_TYPE.WORD_BALLOON,
     },
   });
@@ -204,8 +207,40 @@ export const WordBalloonEditor = () => {
 
   return (
     <React.Fragment>
-      <EditorScene sx={{ height: "95vh" }}>
-        <EditorScene.Left xs={2}></EditorScene.Left>
+      <EditorScene spacing={1} sx={{ height: "95vh" }}>
+        <EditorScene.Left xs={2}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 1, width: "100%" }}>
+            <FormControl fullWidth>
+              <InputLabel size="small">Level</InputLabel>
+              <Select label="Level" size="small" {...register("levelId")} native disabled>
+                {levels.count &&
+                  levels.rows.map((level) => (
+                    <option key={level.id} value={level.id}>
+                      {level.name}
+                    </option>
+                  ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel size="small">Level</InputLabel>
+              <Select label="Unit" size="small" {...register("unitId")} native disabled>
+                <option key={1} value={1}>
+                  School thing
+                </option>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel size="small">Level</InputLabel>
+              <Select label="Lesson list" size="small" {...register("gameType")} native disabled>
+                {Object.entries(GAME_TYPE).map(([key, value]) => (
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </EditorScene.Left>
         <EditorScene.Mid xs={8}>
           <DndContext
             sensors={sensors}
