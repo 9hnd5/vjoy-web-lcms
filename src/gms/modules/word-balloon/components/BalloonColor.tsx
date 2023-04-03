@@ -41,7 +41,7 @@ export const BalloonColor = ({ imgs }: BalloonColorProps) => {
         <Grid container sx={{ overflowX: "auto" }}>
           <Grid item container direction="row" wrap="nowrap">
             {imgs.map((image, index) => (
-              <BalloonDraggable key={`E-${index}`} id={`E-${index}-${(`E-${index}-`)}`} assets={imgs} />
+              <BalloonDraggable key={`E-${index}`} id={`E-${index}-${countIds(`E-${index}-`)}`} assets={imgs} />
             ))}
           </Grid>
           <Grid item container direction="row" wrap="nowrap">

@@ -33,3 +33,14 @@ export const baseService = createApi({
   tagTypes: TAG_TYPES,
   endpoints: () => ({}),
 });
+
+export type Pagination<T extends Record<string, any>> = {
+  data: {
+    rows: T[];
+    count: number;
+  };
+};
+
+export type Result<T extends Record<string, any> = any> = {
+  data: T;
+};
