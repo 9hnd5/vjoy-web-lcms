@@ -69,7 +69,10 @@ export type Lesson = {
   difficulty: number;
   rules?: any;
   asset: Asset;
-  curriculum: Curriculum[];
+  curriculum: {
+    name: string;
+    data: Curriculum[];
+  };
   gameType: string;
   createdAt: Date;
   updatedAt: Date;
