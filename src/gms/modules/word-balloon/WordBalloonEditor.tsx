@@ -38,6 +38,7 @@ import {
   LESSON_STATUS,
   useCreateLessonMutation,
   useLazyGetLessonQuery,
+  useLazyGetLessonsQuery,
   useUpdateLessonMutation,
 } from "gms/services/lessonService";
 import { useGetLevelsQuery } from "gms/services/levelService";
@@ -76,6 +77,8 @@ export const WordBalloonEditor = () => {
   const [openConfirm, setOpenConfirm] = useState(false);
 
   const [getLesson] = useLazyGetLessonQuery();
+
+  const [getLessons, { isLoading: isLessonsLoading }] = useLazyGetLessonsQuery();
 
   const { data: { data: levels } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery({});
 
@@ -170,13 +173,16 @@ export const WordBalloonEditor = () => {
 
   const handleToggleLesson = () => setOpen(!open);
 
-  const handleToggleConfirm = () => {
+  const handleToggleConfirm = async () => {
     if (!getValues("id")) {
       const levelId = getValues("levelId");
       const [difficulty] = Object.entries(LESSON_DIFFICULTY).find(([key, value]) =>
         value === getValues("difficulty") ? true : false
       )!;
-      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}`.toLowerCase());
+      const { data: { data } = { data: { rows: [], count: 0 } } } = await getLessons({
+        gameType: "WORD_BALLOON",
+      });
+      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase());
     }
     setOpenConfirm(!openConfirm);
   };
@@ -401,7 +407,7 @@ export const WordBalloonEditor = () => {
               <Button color="primary" variant="contained" onClick={handleToggleLesson}>
                 Load
               </Button>
-              <Button color="primary" variant="contained" onClick={handleToggleConfirm}>
+              <Button color="primary" variant="contained" onClick={handleToggleConfirm} disabled={isLessonsLoading}>
                 Save
               </Button>
               <Button color="primary" variant="contained" disabled={isUpdating} onClick={handlePubic}>

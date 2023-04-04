@@ -97,6 +97,7 @@ export type Asset = {
 
 export const {
   useGetLessonsQuery,
+  useLazyGetLessonsQuery,
   useGetLessonQuery,
   useLazyGetLessonQuery,
   useCreateLessonMutation,
