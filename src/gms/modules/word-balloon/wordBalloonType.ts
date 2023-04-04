@@ -1,4 +1,4 @@
-import { Asset } from "gms/services/lessonService";
+import { Asset, Curriculum } from "gms/services/lessonService";
 
 export type AssetImage = {
   url: string;
@@ -9,7 +9,10 @@ export type AssetImage = {
 export type FormType = {
   id?: number;
   status: number;
-  curriculum: FileList;
+  curriculum: {
+    name: string;
+    data: Curriculum[];
+  };
   unitId: number;
   name: string;
   gameType: string;

@@ -69,7 +69,10 @@ export type Lesson = {
   difficulty: number;
   rules?: any;
   asset: Asset;
-  curriculum: Curriculum[];
+  curriculum: {
+    name: string;
+    data: Curriculum[];
+  };
   gameType: string;
   createdAt: Date;
   updatedAt: Date;
@@ -94,6 +97,7 @@ export type Asset = {
 
 export const {
   useGetLessonsQuery,
+  useLazyGetLessonsQuery,
   useGetLessonQuery,
   useLazyGetLessonQuery,
   useCreateLessonMutation,

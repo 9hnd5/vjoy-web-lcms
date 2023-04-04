@@ -38,12 +38,14 @@ import {
   LESSON_STATUS,
   useCreateLessonMutation,
   useLazyGetLessonQuery,
+  useLazyGetLessonsQuery,
   useUpdateLessonMutation,
 } from "gms/services/lessonService";
 import { useGetLevelsQuery } from "gms/services/levelService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
 import { csvToJson } from "gms/ultils/file";
 import React, { useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { BalloonColor } from "./components/BalloonColor";
 import { BalloonDraggable } from "./components/BalloonDraggable";
@@ -76,7 +78,10 @@ export const WordBalloonEditor = () => {
 
   const [getLesson] = useLazyGetLessonQuery();
 
+  const [getLessons, { isLoading: isLessonsLoading }] = useLazyGetLessonsQuery();
+
   const { data: { data: levels } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery({});
+
   const {
     handleSubmit,
     register,
@@ -84,7 +89,7 @@ export const WordBalloonEditor = () => {
     trigger,
     getValues,
     setValue,
-    setError,
+    watch,
     formState: { errors },
   } = useForm<FormType>({
     defaultValues: {
@@ -93,6 +98,19 @@ export const WordBalloonEditor = () => {
       gameType: GAME_TYPE.WORD_BALLOON,
     },
   });
+
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+    onDrop: async (acceptFiles) => {
+      const data = await csvToJson<Curriculum>(acceptFiles[0]);
+      const name = acceptFiles[0].name;
+      setValue("curriculum", { name, data });
+    },
+    accept: {
+      "text/csv": [".csv"],
+    },
+  });
+
+  const curriculum = watch("curriculum");
 
   const [createLesson, { isLoading: isCreating }] = useCreateLessonMutation();
 
@@ -125,29 +143,25 @@ export const WordBalloonEditor = () => {
       bundleUrl: "https://storage.googleapis.com/vjoy-game-asset-dev/.unity_bundle",
     };
 
-    const fileExtension = formData.curriculum[0].name.split(".").at(-1);
-    if (fileExtension !== "csv") return setError("curriculum", { message: "Only Support CSV file extendsion" });
-    const curriculum = await csvToJson<Curriculum>(formData.curriculum[0]);
     const data = {
       ...formData,
       asset,
-      curriculum,
     };
 
     try {
-      //Publish case
+      // Publish case
       if (formData.id && formData.status) {
-        await updateLesson(data);
+        await updateLesson(data).unwrap();
         return notify.success({ content: "Publish Succeed" });
       }
 
       //Update case
       if (formData.id) {
-        await updateLesson(data);
+        await updateLesson(data).unwrap();
         notify.success({ content: "Update Succeed" });
       } else {
         //Create case
-        await createLesson(data);
+        await createLesson(data).unwrap();
         notify.success({ content: "Create Succeed" });
       }
 
@@ -159,16 +173,27 @@ export const WordBalloonEditor = () => {
 
   const handleToggleLesson = () => setOpen(!open);
 
-  const handleToggleConfirm = () => setOpenConfirm(!openConfirm);
+  const handleToggleConfirm = async () => {
+    if (!getValues("id")) {
+      const levelId = getValues("levelId");
+      const [difficulty] = Object.entries(LESSON_DIFFICULTY).find(([key, value]) =>
+        value === getValues("difficulty") ? true : false
+      )!;
+      const { data: { data } = { data: { rows: [], count: 0 } } } = await getLessons({
+        gameType: "WORD_BALLOON",
+      });
+      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase());
+    }
+    setOpenConfirm(!openConfirm);
+  };
 
   const handleLessonSelect = async (id: number) => {
     const { data: { data: lesson } = {} } = await getLesson(id);
     if (!lesson) return;
-
     reset({
       id: lesson.id,
       behavior: lesson.asset.behavior,
-      curriculum: {} as any,
+      curriculum: lesson.curriculum,
       difficulty: lesson.difficulty,
       gameType: lesson.gameType,
       name: lesson.name,
@@ -251,9 +276,16 @@ export const WordBalloonEditor = () => {
             onDragEnd={handleDragEnd}
           >
             <Box
-              sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", p: 1 }}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                height: "100%",
+                p: 1,
+                gap: 2,
+              }}
             >
-              <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, height: "90%" }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", height: "90%" }}>
                 <Box sx={{ display: "flex", flexDirection: "column", width: "20%" }}>
                   <FormControl fullWidth>
                     <InputLabel size="small">Behavior</InputLabel>
@@ -263,10 +295,10 @@ export const WordBalloonEditor = () => {
                       {...register("behavior", { required: "This field is required", valueAsNumber: true })}
                       native
                     >
-                      <option value={1}>STANDING STILL</option>
-                      <option value={2}>HORIZONTAL</option>
-                      <option value={3}>VERTICAL</option>
-                      <option value={4}>RANDOM</option>
+                      <option value={0}>STANDING STILL</option>
+                      <option value={1}>HORIZONTAL</option>
+                      <option value={2}>VERTICAL</option>
+                      <option value={3}>RANDOM</option>
                     </Select>
                   </FormControl>
                 </Box>
@@ -331,19 +363,24 @@ export const WordBalloonEditor = () => {
 
                 <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
               </Box>
-
-              <TextField
-                fullWidth
-                label="Curriculum"
-                type="file"
-                size="small"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                error={!!errors.curriculum}
-                helperText={errors.curriculum ? errors.curriculum.message : " "}
-                {...register("curriculum", { required: "This field is required" })}
-              />
+              <Box>
+                <Box
+                  {...getRootProps()}
+                  sx={{
+                    border: "#999 2px dashed",
+                    backgroundColor: "#EEE",
+                    padding: "0px 8px",
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <input {...getInputProps()} />
+                  <p>Drag and drop or click to select curriculum file</p>
+                </Box>
+                <input type="hidden" {...register("curriculum", { required: "This field is required" })} />
+                <Box sx={{ color: "#d32f2f" }}>{errors?.curriculum?.message}</Box>
+                <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
+              </Box>
             </Box>
           </DndContext>
         </EditorScene.Mid>
@@ -370,7 +407,7 @@ export const WordBalloonEditor = () => {
               <Button color="primary" variant="contained" onClick={handleToggleLesson}>
                 Load
               </Button>
-              <Button color="primary" variant="contained" onClick={handleToggleConfirm}>
+              <Button color="primary" variant="contained" onClick={handleToggleConfirm} disabled={isLessonsLoading}>
                 Save
               </Button>
               <Button color="primary" variant="contained" disabled={isUpdating} onClick={handlePubic}>
