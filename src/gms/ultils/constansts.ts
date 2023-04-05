@@ -1,5 +1,3 @@
-export const TAG_TYPES = ["ASSETS", "LESSONS"];
-
 export const ASSET_BUCKET = "vjoy-game-asset";
 
 export const ASSET_FOLDER = {

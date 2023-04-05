@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { TAG_TYPES } from "gms/ultils/constansts";
 import qs from "query-string";
 
 const baseUrl = ENV.BASE_URL;
@@ -30,7 +29,7 @@ export const baseService = createApi({
       return qs.stringify(params);
     },
   }),
-  tagTypes: TAG_TYPES,
+  tagTypes: ["Asset", "Lesson", "Level", "Unit"],
   endpoints: () => ({}),
 });
 

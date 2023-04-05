@@ -48,7 +48,7 @@ export const ImageSelect = ({ label, selectedImg, imgs, viewRow, onChange }: Ima
       <Grid
         sx={{
           border: `solid 3px ${blueGrey[300]}`,
-          borderRadius: "10px",
+          borderRadius: "4px",
           marginBottom: "10px",
           overflow: "hidden",
         }}

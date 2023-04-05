@@ -1,16 +1,15 @@
-import { Pagination, baseService } from "./baseService";
+import { Pagination, baseService, providesList } from "./baseService";
 
 const url = "content/levels";
 
 const levelService = baseService.injectEndpoints({
   endpoints: (builder) => ({
-    getLevels: builder.query<Pagination<Level>, any>({
-      query: (params) => ({
+    getLevels: builder.query<Pagination<Level>, void>({
+      query: () => ({
         url,
         method: "GET",
-        params,
       }),
-      providesTags: ["LEVELS"],
+      providesTags: (result) => providesList(result?.data.rows, "Level"),
     }),
   }),
 });

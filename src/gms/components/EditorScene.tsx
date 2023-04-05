@@ -1,4 +1,6 @@
-import { Grid, GridProps } from "@mui/material";
+import { Box, Grid, GridProps } from "@mui/material";
+import { blueGrey } from "@mui/material/colors";
+import { merge } from "lodash";
 import React from "react";
 const EditorSceneContext = React.createContext(false);
 type EditorSceneProps = {
@@ -21,7 +23,7 @@ const EditorScene = ({ children, ...restProps }: EditorSceneProps) => {
 
   return (
     <EditorSceneContext.Provider value={true}>
-      <Grid {...restProps} container>
+      <Grid container spacing={1} {...merge(restProps, { sx: { height: "100vh", p: 1 } })}>
         {children}
       </Grid>
     </EditorSceneContext.Provider>
@@ -38,7 +40,17 @@ const Right = (props: RightMidLeftProps) => {
 
   return (
     <Grid {...restProps} item>
-      {children}
+      <Box
+        sx={{
+          border: `solid 4px ${blueGrey[300]}`,
+          borderRadius: "4px",
+          boxSizing: "border-box",
+          p: 1,
+          height: "100%",
+        }}
+      >
+        {children}
+      </Box>
     </Grid>
   );
 };
@@ -49,7 +61,17 @@ const Mid = (props: RightMidLeftProps) => {
 
   return (
     <Grid {...restProps} item>
-      {children}
+      <Box
+        sx={{
+          border: `solid 3px ${blueGrey[300]}`,
+          borderRadius: "4px",
+          boxSizing: "border-box",
+          p: 1,
+          height: "100%",
+        }}
+      >
+        {children}
+      </Box>
     </Grid>
   );
 };
@@ -60,8 +82,18 @@ const Left = (props: RightMidLeftProps) => {
   if (!context) throw new Error("EditorScene.Left Component should be inside EditorScene");
 
   return (
-    <Grid {...restProps} item>
-      {children}
+    <Grid item {...restProps}>
+      <Box
+        sx={{
+          border: `solid 3px ${blueGrey[300]}`,
+          borderRadius: "4px",
+          boxSizing: "border-box",
+          p: 1,
+          height: "100%",
+        }}
+      >
+        {children}
+      </Box>
     </Grid>
   );
 };

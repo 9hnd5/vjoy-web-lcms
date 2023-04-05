@@ -1,5 +1,5 @@
 const path = require("path");
-const { ESBuildMinifyPlugin } = require("esbuild-loader");
+const { EsbuildPlugin } = require("esbuild-loader");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
     },
     minimizer: [
       // minizier for both css and js
-      new ESBuildMinifyPlugin({
+      new EsbuildPlugin({
         target: "es2015",
         css: true,
       }),
