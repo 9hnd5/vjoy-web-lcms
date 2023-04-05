@@ -1,4 +1,4 @@
-import { baseService, Pagination, Result } from "./baseService";
+import { baseService, Pagination, providesList, Result } from "./baseService";
 
 const url = "content/lessons";
 
@@ -10,30 +10,33 @@ const lessonService = baseService.injectEndpoints({
         method: "GET",
         params: { filter: JSON.stringify(params) },
       }),
-      providesTags: ["LESSONS"],
+      providesTags: (result) => providesList(result?.data.rows, "Lesson"),
     }),
+
     getLesson: builder.query<Result<Lesson>, number>({
       query: (id) => ({
         url: `${url}/${id}`,
         method: "GET",
       }),
-      providesTags: ["LESSONS"],
+      providesTags: (result, error, id) => [{ type: "Lesson", id }],
     }),
+
     updateLesson: builder.mutation<void, Partial<Lesson>>({
       query: (body) => ({
         url: `${url}/${body.id}`,
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["LESSONS"],
+      invalidatesTags: (result, error, { id }) => (error ? [] : [{ type: "Lesson", id }]),
     }),
+
     createLesson: builder.mutation<void, Partial<Lesson>>({
       query: (body) => ({
         url,
         method: "POST",
         body,
       }),
-      invalidatesTags: ["LESSONS"],
+      invalidatesTags: (result, error) => (error ? [] : [{ type: "Lesson", id: "LIST" }]),
     }),
   }),
 });

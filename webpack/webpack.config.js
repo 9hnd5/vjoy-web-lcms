@@ -41,11 +41,10 @@ module.exports = ({ env }) => {
       rules: [
         //Loader for typescript(.tsx)
         {
-          test: /\.tsx?$/,
+          test: /\.[jt]sx?$/,
           exclude: /node_modules/,
           loader: "esbuild-loader",
           options: {
-            loader: "tsx",
             target: "es2015",
           },
         },

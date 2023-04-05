@@ -32,36 +32,33 @@ module.exports = {
   },
   plugins: [
     new ReactRefreshWebpackPlugin(),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/ahooks.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/axios.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/lodash.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/querystring.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/styledcomponents.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/react.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/ra.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/router.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/mui.manifest.json")),
-    }),
-    new webpack.DllReferencePlugin({
-      manifest: require(path.resolve(process.cwd(), "dll/rtk.manifest.json")),
-    }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/ahooks.manifest.json")),
+    // }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/axios.manifest.json")),
+    // }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/lodash.manifest.json")),
+    // }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/querystring.manifest.json")),
+    // }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/react.manifest.json")),
+    // }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/ra.manifest.json")),
+    // }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/router.manifest.json")),
+    // }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/mui.manifest.json")),
+    // }),
+    // new webpack.DllReferencePlugin({
+    //   manifest: require(path.resolve(process.cwd(), "dll/rtk.manifest.json")),
+    // }),
   ],
   output: {
     path: path.join(process.cwd(), "./dist"),

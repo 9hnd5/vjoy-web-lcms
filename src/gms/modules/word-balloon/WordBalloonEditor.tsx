@@ -22,6 +22,7 @@ import {
   InputLabel,
   Select,
   TextField,
+  Grid,
 } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
 import { EditorScene } from "gms/components/EditorScene";
@@ -54,6 +55,7 @@ import { ImageSelect } from "./components/ImageSelect";
 import { LessonModal } from "./components/LessonModal";
 import { assignBalloon, removeAllBalloon, removeBalloon, selectAllAssignedBalloons } from "./wordBalloonSlice";
 import { AssetImage, AssignmentsMap, FormType } from "./wordBalloonType";
+import { useGetUnitsQuery } from "gms/services/unitService";
 
 export const WordBalloonEditor = () => {
   const dispatch = useAppDispatch();
@@ -80,7 +82,9 @@ export const WordBalloonEditor = () => {
 
   const [getLessons, { isLoading: isLessonsLoading }] = useLazyGetLessonsQuery();
 
-  const { data: { data: levels } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery({});
+  const { data: { data: level } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery();
+
+  const { data: { data: unit } = { data: { rows: [], count: 0 } } } = useGetUnitsQuery();
 
   const {
     handleSubmit,
@@ -103,7 +107,7 @@ export const WordBalloonEditor = () => {
     onDrop: async (acceptFiles) => {
       const data = await csvToJson<Curriculum>(acceptFiles[0]);
       const name = acceptFiles[0].name;
-      setValue("curriculum", { name, data });
+      setValue("curriculum", { name, data }, { shouldValidate: true });
     },
     accept: {
       "text/csv": [".csv"],
@@ -174,7 +178,7 @@ export const WordBalloonEditor = () => {
   const handleToggleLesson = () => setOpen(!open);
 
   const handleToggleConfirm = async () => {
-    if (!getValues("id")) {
+    if (!getValues("id") && !openConfirm) {
       const levelId = getValues("levelId");
       const [difficulty] = Object.entries(LESSON_DIFFICULTY).find(([key, value]) =>
         value === getValues("difficulty") ? true : false
@@ -232,26 +236,27 @@ export const WordBalloonEditor = () => {
 
   return (
     <React.Fragment>
-      <EditorScene spacing={1} sx={{ height: "95vh" }}>
+      <EditorScene>
         <EditorScene.Left xs={2}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 1, width: "100%" }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
             <FormControl fullWidth>
               <InputLabel size="small">Level</InputLabel>
               <Select label="Level" size="small" {...register("levelId")} native disabled>
-                {levels.count &&
-                  levels.rows.map((level) => (
-                    <option key={level.id} value={level.id}>
-                      {level.name}
-                    </option>
-                  ))}
+                {level.rows.map((level) => (
+                  <option key={level.id} value={level.id}>
+                    {level.name}
+                  </option>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>
               <InputLabel size="small">Unit</InputLabel>
               <Select label="Unit" size="small" {...register("unitId")} native disabled>
-                <option key={1} value={1}>
-                  School thing
-                </option>
+                {unit.rows.map((unit) => (
+                  <option key={unit.id} value={unit.id}>
+                    {unit.name}
+                  </option>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>
@@ -275,18 +280,9 @@ export const WordBalloonEditor = () => {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                height: "100%",
-                p: 1,
-                gap: 2,
-              }}
-            >
-              <Box sx={{ display: "flex", justifyContent: "space-between", height: "90%" }}>
-                <Box sx={{ display: "flex", flexDirection: "column", width: "20%" }}>
+            <Grid container spacing={2} sx={{ height: "100%" }} direction="column" wrap="nowrap">
+              <Grid container spacing={2} item xs={11}>
+                <Grid item xs={3}>
                   <FormControl fullWidth>
                     <InputLabel size="small">Behavior</InputLabel>
                     <Select
@@ -301,46 +297,49 @@ export const WordBalloonEditor = () => {
                       <option value={3}>RANDOM</option>
                     </Select>
                   </FormControl>
-                </Box>
-                <Box
-                  sx={{
-                    position: "relative",
-                    width: "50%",
-                    backgroundColor: lightBlue[300],
-                    border: `solid 3px ${blueGrey[300]}`,
-                    borderRadius: "10px",
-                  }}
-                >
-                  <Board position="absolute" width="90%" top="25%" left="5%" zIndex="999" assets={balloonAssets} />
-                  {assets && (
-                    <>
-                      <img
-                        src={selectedBackground?.imgSrc}
-                        style={{
-                          width: "calc(100% - 16px)",
-                          height: "75%",
-                          objectFit: "cover",
-                          position: "absolute",
-                          bottom: "10%",
-                          left: "8px",
-                        }}
-                      />
+                </Grid>
+                <Grid item xs={6}>
+                  <Box
+                    sx={{
+                      position: "relative",
+                      width: "100%%",
+                      height: "100%",
+                      backgroundColor: lightBlue[300],
+                      border: `solid 3px ${blueGrey[300]}`,
+                      borderRadius: "4px",
+                    }}
+                  >
+                    <Board position="absolute" width="90%" top="25%" left="5%" zIndex="999" assets={balloonAssets} />
+                    {assets && (
+                      <>
+                        <img
+                          src={selectedBackground?.imgSrc}
+                          style={{
+                            width: "calc(100% - 16px)",
+                            height: "75%",
+                            objectFit: "cover",
+                            position: "absolute",
+                            bottom: "10%",
+                            left: "8px",
+                          }}
+                        />
 
-                      <img
-                        src={selectedCannon?.imgSrc}
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          objectFit: "cover",
-                          position: "absolute",
-                          bottom: "10%",
-                          left: "calc(50% - 50px)",
-                        }}
-                      />
-                    </>
-                  )}
-                </Box>
-                <Box sx={{ display: "flex", flexDirection: "column", width: "20%" }}>
+                        <img
+                          src={selectedCannon?.imgSrc}
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            objectFit: "cover",
+                            position: "absolute",
+                            bottom: "10%",
+                            left: "calc(50% - 50px)",
+                          }}
+                        />
+                      </>
+                    )}
+                  </Box>
+                </Grid>
+                <Grid item xs={3}>
                   {assets && (
                     <>
                       <BalloonColor imgs={balloonAssets} />
@@ -359,33 +358,35 @@ export const WordBalloonEditor = () => {
                       />
                     </>
                   )}
-                </Box>
-
-                <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
-              </Box>
-              <Box>
-                <Box
-                  {...getRootProps()}
-                  sx={{
-                    border: "#999 2px dashed",
-                    backgroundColor: "#EEE",
-                    padding: "0px 8px",
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <input {...getInputProps()} />
-                  <p>Drag and drop or click to select curriculum file</p>
-                </Box>
-                <input type="hidden" {...register("curriculum", { required: "This field is required" })} />
-                <Box sx={{ color: "#d32f2f" }}>{errors?.curriculum?.message}</Box>
-                <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
-              </Box>
-            </Box>
+                </Grid>
+              </Grid>
+              <Grid container item xs={1}>
+                <Grid item xs={12}>
+                  <Box
+                    {...getRootProps()}
+                    style={{
+                      border: "#999 2px dashed",
+                      boxSizing: "border-box",
+                      backgroundColor: "#EEE",
+                      padding: "0px 8px",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <input {...getInputProps()} />
+                    <p>Drag and drop or click to select curriculum file</p>
+                  </Box>
+                  <input type="hidden" {...register("curriculum", { required: "This field is required" })} />
+                  <Box sx={{ color: "#d32f2f" }}>{errors?.curriculum?.message}</Box>
+                  <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
+                </Grid>
+              </Grid>
+              <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
+            </Grid>
           </DndContext>
         </EditorScene.Mid>
         <EditorScene.Right xs={2}>
-          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", p: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <FormControl>
                 <InputLabel size="small">Difficulty</InputLabel>
