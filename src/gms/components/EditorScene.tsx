@@ -42,7 +42,7 @@ const Right = (props: RightMidLeftProps) => {
     <Grid {...restProps} item>
       <Box
         sx={{
-          border: `solid 4px ${blueGrey[300]}`,
+          border: `solid 3px ${blueGrey[300]}`,
           borderRadius: "4px",
           boxSizing: "border-box",
           p: 1,

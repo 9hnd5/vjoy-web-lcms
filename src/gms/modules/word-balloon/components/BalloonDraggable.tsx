@@ -1,8 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Grid, Typography } from "@mui/material";
+import { Grid, Typography, styled } from "@mui/material";
 import { blueGrey } from "@mui/material/colors";
-import { styled } from "@mui/material/styles";
 import { useMemo } from "react";
 import { WORD_ON_BALLOON } from "../wordBalloonContant";
 import { AssetImage } from "../wordBalloonType";

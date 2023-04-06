@@ -66,7 +66,7 @@ module.exports = ({ env }) => {
         ENV: JSON.stringify(envVars),
       }),
       new HtmlWebpackPlugin({
-        template: path.join(process.cwd(), "src/index.html"),
+        template: path.join(process.cwd(), "index.html"),
         favicon: path.join(process.cwd(), "src/assets/favicon.ico"),
         title: "LCMS",
         templateParameters: {

@@ -20,7 +20,7 @@ module.exports = {
       },
     },
   },
-  ignorePatterns: [".eslintrc.js", "webpack/", "env.*", "src/assets", "src/*.css", "src/*.html", "eslint*"],
+  ignorePatterns: [".eslintrc.js", "dll/", "webpack/", "env.*", "src/assets", "src/*.css", "src/*.html", "eslint*"],
   plugins: ["@typescript-eslint"],
   extends: [
     "eslint:recommended", //eslint-plugin-import

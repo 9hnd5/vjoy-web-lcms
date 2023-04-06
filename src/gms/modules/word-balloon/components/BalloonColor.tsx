@@ -1,9 +1,7 @@
 import { useDroppable } from "@dnd-kit/core";
-import { Grid, InputLabel } from "@mui/material";
+import { Grid, InputLabel, styled } from "@mui/material";
 import { blueGrey, orange } from "@mui/material/colors";
-import { styled } from "@mui/material/styles";
 import { useAppSelector } from "gms/hooks/useAppSelector";
-
 import { upperCase } from "lodash";
 import { selectAssignedIdCount } from "../wordBalloonSlice";
 import { AssetImage } from "../wordBalloonType";
