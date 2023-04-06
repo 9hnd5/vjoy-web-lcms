@@ -1,4 +1,4 @@
-import { styled } from "@mui/material/styles";
+import { styled } from "@mui/material";
 import { LoginForm } from "./LoginForm";
 
 const Container = styled("div")(() => ({

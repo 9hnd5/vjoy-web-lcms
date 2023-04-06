@@ -1,5 +1,4 @@
-import { Container } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, Container, ThemeProvider } from "@mui/material";
 import { Provider } from "react-redux";
 import { Route, Routes } from "react-router-dom";
 import { WordBalloonEditor } from "./modules/word-balloon/WordBalloonEditor";

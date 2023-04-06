@@ -53,6 +53,7 @@
     "piscina": "^3.2.0",
     "prettier": "^2.8.3",
     "react-refresh": "^0.14.0",
+    "rimraf": "^4.4.1",
     "style-loader": "^3.3.1",
     "typescript": "^5.0.3",
     "webpack": "^5.75.0",

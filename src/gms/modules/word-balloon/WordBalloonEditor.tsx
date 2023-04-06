@@ -102,6 +102,9 @@ export const WordBalloonEditor = () => {
       gameType: GAME_TYPE.WORD_BALLOON,
     },
   });
+  const registerLevelId = register("levelId");
+  const registerUnitId = register("unitId");
+  const registerGameType = register("gameType");
 
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     onDrop: async (acceptFiles) => {
@@ -241,7 +244,13 @@ export const WordBalloonEditor = () => {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
             <FormControl fullWidth>
               <InputLabel size="small">Level</InputLabel>
-              <Select label="Level" size="small" {...register("levelId")} native disabled>
+              <Select
+                label="Level"
+                size="small"
+                {...{ registerLevelId, inputRef: registerLevelId.ref }}
+                native
+                disabled
+              >
                 {level.rows.map((level) => (
                   <option key={level.id} value={level.id}>
                     {level.name}
@@ -251,7 +260,7 @@ export const WordBalloonEditor = () => {
             </FormControl>
             <FormControl fullWidth>
               <InputLabel size="small">Unit</InputLabel>
-              <Select label="Unit" size="small" {...register("unitId")} native disabled>
+              <Select label="Unit" size="small" {...{ registerUnitId, inputRef: registerUnitId.ref }} native disabled>
                 {unit.rows.map((unit) => (
                   <option key={unit.id} value={unit.id}>
                     {unit.name}
@@ -261,7 +270,13 @@ export const WordBalloonEditor = () => {
             </FormControl>
             <FormControl fullWidth>
               <InputLabel size="small">Lesson List</InputLabel>
-              <Select label="Lesson list" size="small" {...register("gameType")} native disabled>
+              <Select
+                label="Lesson list"
+                size="small"
+                {...{ registerGameType, inputRef: registerGameType.ref }}
+                native
+                disabled
+              >
                 {Object.entries(GAME_TYPE).map(([key, value]) => (
                   <option key={key} value={key}>
                     {value}

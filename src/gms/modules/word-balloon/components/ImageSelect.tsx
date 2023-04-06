@@ -1,7 +1,5 @@
-import { Grid, ImageList, ImageListItem, ImageListItemProps, InputLabel } from "@mui/material";
+import { Grid, ImageList, ImageListItem, ImageListItemProps, InputLabel, styled } from "@mui/material";
 import { blueGrey, orange } from "@mui/material/colors";
-import { styled } from "@mui/material/styles";
-
 import { upperCase } from "lodash";
 import { AssetImage } from "../wordBalloonType";
 

@@ -1,6 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-import { Box, BoxProps } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, BoxProps, styled } from "@mui/material";
 import { useAppSelector } from "gms/hooks/useAppSelector";
 import { selectAssignedBalloons } from "../wordBalloonSlice";
 import { AssetImage } from "../wordBalloonType";
@@ -30,7 +29,7 @@ export const BoardSquare = ({ id, width, assets }: BoardSquareProps) => {
   const { setNodeRef } = useDroppable({
     id: id,
   });
-  const balloons = useAppSelector(s => selectAssignedBalloons(s)(id));
+  const balloons = useAppSelector((s) => selectAssignedBalloons(s)(id));
 
   return (
     <StyledBox bgcolor="transparent" cellWidth={width} ref={setNodeRef}>
