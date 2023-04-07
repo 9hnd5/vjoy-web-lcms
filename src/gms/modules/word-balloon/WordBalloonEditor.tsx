@@ -47,7 +47,7 @@ import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constansts";
 import { csvToJson } from "gms/ultils/file";
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler, useForm, Controller } from "react-hook-form";
 import { BalloonColor } from "./components/BalloonColor";
 import { BalloonDraggable } from "./components/BalloonDraggable";
 import { Board } from "./components/Board";
@@ -80,7 +80,7 @@ export const WordBalloonEditor = () => {
 
   const [getLesson] = useLazyGetLessonQuery();
 
-  const [getLessons, { isLoading: isLessonsLoading }] = useLazyGetLessonsQuery();
+  const [getLessons, { isFetching: isLessonsLoading }] = useLazyGetLessonsQuery();
 
   const { data: { data: level } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery();
 
@@ -94,17 +94,17 @@ export const WordBalloonEditor = () => {
     getValues,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<FormType>({
     defaultValues: {
       unitId: 1,
       levelId: "eng-preA1",
+      difficulty: 0,
+      behavior: 0,
       gameType: GAME_TYPE.WORD_BALLOON,
     },
   });
-  const registerLevelId = register("levelId");
-  const registerUnitId = register("unitId");
-  const registerGameType = register("gameType");
 
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     onDrop: async (acceptFiles) => {
@@ -189,7 +189,9 @@ export const WordBalloonEditor = () => {
       const { data: { data } = { data: { rows: [], count: 0 } } } = await getLessons({
         gameType: "WORD_BALLOON",
       });
-      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase());
+      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase(), {
+        shouldValidate: true,
+      });
     }
     setOpenConfirm(!openConfirm);
   };
@@ -242,48 +244,54 @@ export const WordBalloonEditor = () => {
       <EditorScene>
         <EditorScene.Left xs={2}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
-            <FormControl fullWidth>
-              <InputLabel size="small">Level</InputLabel>
-              <Select
-                label="Level"
-                size="small"
-                {...{ registerLevelId, inputRef: registerLevelId.ref }}
-                native
-                disabled
-              >
-                {level.rows.map((level) => (
-                  <option key={level.id} value={level.id}>
-                    {level.name}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel size="small">Unit</InputLabel>
-              <Select label="Unit" size="small" {...{ registerUnitId, inputRef: registerUnitId.ref }} native disabled>
-                {unit.rows.map((unit) => (
-                  <option key={unit.id} value={unit.id}>
-                    {unit.name}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel size="small">Lesson List</InputLabel>
-              <Select
-                label="Lesson list"
-                size="small"
-                {...{ registerGameType, inputRef: registerGameType.ref }}
-                native
-                disabled
-              >
-                {Object.entries(GAME_TYPE).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
+            <Controller
+              control={control}
+              name="levelId"
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel size="small">Level</InputLabel>
+                  <Select label="Level" size="small" native disabled {...field}>
+                    {level.rows.map((level) => (
+                      <option key={level.id} value={level.id}>
+                        {level.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
+            <Controller
+              control={control}
+              name="unitId"
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel size="small">Unit</InputLabel>
+                  <Select label="Unit" size="small" native disabled {...field}>
+                    {unit.rows.map((unit) => (
+                      <option key={unit.id} value={unit.id}>
+                        {unit.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
+            <Controller
+              control={control}
+              name="gameType"
+              render={({ field }) => (
+                <FormControl fullWidth>
+                  <InputLabel size="small">Lesson List</InputLabel>
+                  <Select label="Lesson list" size="small" native disabled {...field}>
+                    {Object.entries(GAME_TYPE).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
           </Box>
         </EditorScene.Left>
         <EditorScene.Mid xs={8}>
@@ -298,20 +306,23 @@ export const WordBalloonEditor = () => {
             <Grid container spacing={2} sx={{ height: "100%" }} direction="column" wrap="nowrap">
               <Grid container spacing={2} item xs={11}>
                 <Grid item xs={3}>
-                  <FormControl fullWidth>
-                    <InputLabel size="small">Behavior</InputLabel>
-                    <Select
-                      label="Behavior"
-                      size="small"
-                      {...register("behavior", { required: "This field is required", valueAsNumber: true })}
-                      native
-                    >
-                      <option value={0}>STANDING STILL</option>
-                      <option value={1}>HORIZONTAL</option>
-                      <option value={2}>VERTICAL</option>
-                      <option value={3}>RANDOM</option>
-                    </Select>
-                  </FormControl>
+                  <Controller
+                    control={control}
+                    name="behavior"
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel size="small" shrink>
+                          Behavior
+                        </InputLabel>
+                        <Select label="Behavior" size="small" native {...field}>
+                          <option value={0}>STANDING STILL</option>
+                          <option value={1}>HORIZONTAL</option>
+                          <option value={2}>VERTICAL</option>
+                          <option value={3}>RANDOM</option>
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={6}>
                   <Box
@@ -403,21 +414,24 @@ export const WordBalloonEditor = () => {
         <EditorScene.Right xs={2}>
           <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <FormControl>
-                <InputLabel size="small">Difficulty</InputLabel>
-                <Select
-                  label="Difficulty"
-                  size="small"
-                  {...register("difficulty", { required: "This field is required", valueAsNumber: true })}
-                  native
-                >
-                  {Object.entries(LESSON_DIFFICULTY).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {key.toUpperCase()}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
+              <Controller
+                control={control}
+                name="difficulty"
+                render={({ field }) => (
+                  <FormControl>
+                    <InputLabel size="small" shrink>
+                      Difficulty
+                    </InputLabel>
+                    <Select label="Difficulty" size="small" native {...field}>
+                      {Object.entries(LESSON_DIFFICULTY).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {key.toUpperCase()}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              />
             </Box>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Button color="primary" variant="contained" onClick={handleToggleLesson}>
@@ -437,14 +451,22 @@ export const WordBalloonEditor = () => {
       <Dialog open={openConfirm} onClose={handleToggleConfirm}>
         <DialogTitle>Confirm Save</DialogTitle>
         <DialogContent>
-          <TextField
-            size="small"
-            label="Name"
-            fullWidth
-            margin="dense"
-            error={!!errors.name}
-            helperText={errors.name ? errors.name.message : " "}
-            {...register("name", { required: "This field is required" })}
+          <Controller
+            control={control}
+            name="name"
+            rules={{ required: "This field is required" }}
+            render={({ field }) => (
+              <TextField
+                size="small"
+                label="Name"
+                fullWidth
+                margin="dense"
+                error={!!errors.name}
+                helperText={errors.name ? errors.name.message : " "}
+                InputLabelProps={{ shrink: true }}
+                {...field}
+              />
+            )}
           />
         </DialogContent>
         <DialogActions>
