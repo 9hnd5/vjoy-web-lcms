@@ -3,8 +3,8 @@ import { Grid, InputLabel, styled } from "@mui/material";
 import { blueGrey, orange } from "@mui/material/colors";
 import { useAppSelector } from "gms/hooks/useAppSelector";
 import { upperCase } from "lodash";
-import { selectAssignedIdCount } from "../wordBalloonSlice";
-import { BalloonDraggable } from "./BalloonDraggable";
+import { selectAssignedIdCount } from "../bustAWordSlice";
+import { SphereDraggable } from "./SphereDraggable";
 import { AssetImage } from "gms/ultils/types";
 
 const ImageContainer = styled("div")(() => ({
@@ -14,11 +14,11 @@ const ImageContainer = styled("div")(() => ({
   overflow: "hidden",
 }));
 
-type BalloonColorProps = {
+type SphereColorProps = {
   imgs: AssetImage[];
 };
 
-export const BalloonColor = ({ imgs }: BalloonColorProps) => {
+export const SphereColor = ({ imgs }: SphereColorProps) => {
   const { setNodeRef } = useDroppable({
     id: "remove-assignment",
   });
@@ -33,18 +33,13 @@ export const BalloonColor = ({ imgs }: BalloonColorProps) => {
           padding: "10px",
         }}
       >
-        {upperCase("balloon color")}
+        {upperCase("Sphere color")}
       </InputLabel>
       <ImageContainer ref={setNodeRef}>
         <Grid container sx={{ overflowX: "auto" }}>
           <Grid item container direction="row" wrap="nowrap">
             {imgs.map((image, index) => (
-              <BalloonDraggable key={`E-${index}`} id={`E-${index}-${countIds(`E-${index}-`)}`} assets={imgs} />
-            ))}
-          </Grid>
-          <Grid item container direction="row" wrap="nowrap">
-            {imgs.map((image, index) => (
-              <BalloonDraggable key={`W-${index}`} id={`W-${index}-${countIds(`W-${index}-`)}`} assets={imgs} />
+              <SphereDraggable key={`${index}`} id={`${index}-${countIds(`${index}-`)}`} assets={imgs} />
             ))}
           </Grid>
         </Grid>

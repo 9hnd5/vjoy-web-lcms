@@ -3,7 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Grid, Typography, styled } from "@mui/material";
 import { blueGrey } from "@mui/material/colors";
 import { useMemo } from "react";
-import { WORD_ON_BALLOON } from "../wordBalloonContant";
+import { WORD_ON_SPHERE } from "../bustAWordContant";
 import { AssetImage } from "gms/ultils/types";
 
 const ImageItem = styled(Grid)(() => ({
@@ -17,12 +17,12 @@ const ImageItem = styled(Grid)(() => ({
   },
 }));
 
-type BalloonProps = {
+type SphereProps = {
   id: string;
   assets: AssetImage[];
 };
 
-export const BalloonDraggable = ({ id, assets }: BalloonProps) => {
+export const SphereDraggable = ({ id, assets }: SphereProps) => {
   const { attributes, active, listeners, setNodeRef, transform } = useDraggable({
     id,
   });
@@ -52,7 +52,7 @@ export const BalloonDraggable = ({ id, assets }: BalloonProps) => {
             color: "#fff",
           }}
         >
-          {WORD_ON_BALLOON}
+          {WORD_ON_SPHERE}
         </Typography>
       )}
     </ImageItem>

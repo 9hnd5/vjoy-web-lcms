@@ -56,11 +56,11 @@ export const LESSON_DIFFICULTY = {
 };
 
 export const GAME_TYPE = {
-  WORD_BALLOON: "WORD_BALLOON",
-  TRIVIA: "TRIVIA",
-  DIY: "DIY",
   BUST_A_WORD: "BUST_A_WORD",
+  DIY: "DIY",
   DROPPY_BIRD: "DROPPY_BIRD",
+  TRIVIA: "TRIVIA",
+  WORD_BALLOON: "WORD_BALLOON",
   WORD_SHARK: "WORD_SHARK",
 };
 
@@ -71,7 +71,7 @@ export type Lesson = {
   unitId: number;
   difficulty: number;
   rules?: any;
-  asset: Asset;
+  asset: BustAWordAsset | WordBalloonAsset;
   curriculum: {
     name: string;
     data: Curriculum[];
@@ -90,12 +90,22 @@ export type Balloon = {
   position: string;
   name: string;
 };
-export type Asset = {
+export type WordBalloonAsset = {
   bundleUrl: string;
   balloons: Balloon[];
   bg: string;
   cannon: string;
   behavior: number;
+};
+export type Sphere = {
+  type: string;
+  name: string;
+};
+export type BustAWordAsset = {
+  bundleUrl: string;
+  bg: string;
+  cannon: string;
+  spheres: Sphere[];
 };
 
 export const {
