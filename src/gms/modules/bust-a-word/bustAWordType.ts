@@ -1,4 +1,4 @@
-import { Curriculum, WordBalloonAsset } from "gms/services/lessonService";
+import { BustAWordAsset, Curriculum } from "gms/services/lessonService";
 
 export type FormType = {
   id?: number;
@@ -12,8 +12,9 @@ export type FormType = {
   gameType: string;
   difficulty: number;
   behavior: number;
-  asset: WordBalloonAsset;
+  asset: BustAWordAsset;
   levelId: string;
+  totalLines?: number;
 };
 
 export type AssignmentsMap = { [key: string]: string | undefined };

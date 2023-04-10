@@ -1,4 +1,4 @@
-import { baseService, providesList } from "./baseService";
+import { baseService } from "./baseService";
 
 const url = "file-uploader/files";
 

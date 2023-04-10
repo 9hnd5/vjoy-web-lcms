@@ -19,48 +19,50 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormGroup,
+  Grid,
   InputLabel,
   Select,
   TextField,
-  Grid,
 } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
 import { EditorScene } from "gms/components/EditorScene";
+import { ImageSelect } from "gms/components/ImageSelect";
 import LoadingComponent from "gms/components/LoadingComponent";
 import { useAppDispatch } from "gms/hooks/useAppDispatch";
 import { useAppSelector } from "gms/hooks/useAppSelector";
 import { useNotification } from "gms/hooks/useNotification";
 import { useGetAssetsQuery } from "gms/services/assetService";
 import {
-  Balloon,
+  BustAWordAsset,
   Curriculum,
   GAME_TYPE,
   LESSON_DIFFICULTY,
   LESSON_STATUS,
+  Sphere,
   useCreateLessonMutation,
   useLazyGetLessonQuery,
   useLazyGetLessonsQuery,
   useUpdateLessonMutation,
-  WordBalloonAsset,
 } from "gms/services/lessonService";
 import { useGetLevelsQuery } from "gms/services/levelService";
+import { useGetUnitsQuery } from "gms/services/unitService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constants";
 import { csvToJson } from "gms/ultils/file";
-import React, { useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { SubmitHandler, useForm, Controller } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { BalloonColor } from "./components/BalloonColor";
-import { BalloonDraggable } from "./components/BalloonDraggable";
-import { Board } from "./components/Board";
-import { ImageSelect } from "./components/ImageSelect";
-import { LessonModal } from "./components/LessonModal";
-import { assignBalloon, removeAllBalloon, removeBalloon, selectAllAssignedBalloons } from "./wordBalloonSlice";
-import { AssignmentsMap, FormType } from "./wordBalloonType";
-import { useGetUnitsQuery } from "gms/services/unitService";
 import { AssetImage } from "gms/ultils/types";
+import React, { useMemo, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { assignSphere, removeAllSphere, removeSphere, selectAllAssignedSpheres } from "./bustAWordSlice";
+import { AssignmentsMap, FormType } from "./bustAWordType";
+import { Board } from "./components/Board";
+import { LessonModal } from "./components/LessonModal";
+import { SphereColor } from "./components/SphereColor";
+import { SphereDraggable } from "./components/SphereDraggable";
+import { WordSwitch } from "./components/WordSwitch";
 
-export const WordBalloonEditor = () => {
+export const BustAWordEditor = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -72,9 +74,10 @@ export const WordBalloonEditor = () => {
   });
   const [selectedBackground, setSelectedBackground] = useState<AssetImage>();
   const [selectedCannon, setSelectedCannon] = useState<AssetImage>();
+  const [wordsArray, setWordsArray] = useState<boolean[]>([]);
 
   const [activeId, setActiveId] = useState<string | null>(null);
-  const assignmentsMap = useAppSelector(selectAllAssignedBalloons);
+  const assignmentsMap = useAppSelector(selectAllAssignedSpheres);
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor), useSensor(KeyboardSensor));
 
@@ -84,7 +87,7 @@ export const WordBalloonEditor = () => {
 
   const [getLesson] = useLazyGetLessonQuery();
 
-  const [getLessons, { isFetching: isLessonsLoading }] = useLazyGetLessonsQuery();
+  const [getLessons, { isLoading: isLessonsLoading }] = useLazyGetLessonsQuery();
 
   const { data: { data: level } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery();
 
@@ -105,8 +108,8 @@ export const WordBalloonEditor = () => {
       unitId: 1,
       levelId: "eng-preA1",
       difficulty: LESSON_DIFFICULTY.EASY,
-      behavior: 0,
-      gameType: GAME_TYPE.WORD_BALLOON,
+      gameType: GAME_TYPE.BUST_A_WORD,
+      totalLines: 0,
     },
   });
 
@@ -122,6 +125,19 @@ export const WordBalloonEditor = () => {
   });
 
   const curriculum = watch("curriculum");
+  const totalLines = watch("totalLines");
+  useMemo(() => {
+    const lines = totalLines ?? 0;
+    let words = wordsArray;
+    if (lines > wordsArray.length) {
+      const numToAdd = lines - wordsArray.length;
+      const newElements = Array.from({ length: numToAdd }, () => false);
+      words = [...wordsArray, ...newElements];
+    } else if (lines < wordsArray.length) {
+      words = wordsArray.slice(0, lines);
+    }
+    setWordsArray(words);
+  }, [totalLines, wordsArray]);
 
   const [createLesson, { isLoading: isCreating }] = useCreateLessonMutation();
 
@@ -138,22 +154,22 @@ export const WordBalloonEditor = () => {
   });
 
   const backgroundAssets = assets.filter((item) => item.url.includes("/bg/"));
-  const balloonAssets = assets.filter((item) => item.url.includes("/balloon/"));
+  const sphereAssets = assets.filter((item) => item.url.includes("/balloon/"));
   const cannonAssets = assets.filter((item) => item.url.includes("/cannon/"));
 
   if (backgroundAssets.length && !selectedBackground) setSelectedBackground(backgroundAssets[0]);
   if (cannonAssets.length && !selectedCannon) setSelectedCannon(cannonAssets[0]);
 
   const handleSubmitForm: SubmitHandler<FormType> = async (formData) => {
-    const balloons = transferMapToBalloonAssets(assignmentsMap, balloonAssets);
+    const spheres = transferMapToAssets(assignmentsMap, sphereAssets);
     const asset = {
-      balloons,
+      spheres,
       bg: selectedBackground!.name,
       cannon: selectedCannon!.name,
-      behavior: formData.behavior,
       bundleUrl: "https://storage.googleapis.com/vjoy-game-asset-dev/.unity_bundle",
     };
 
+    delete formData.totalLines;
     const data = {
       ...formData,
       asset,
@@ -191,11 +207,9 @@ export const WordBalloonEditor = () => {
         value === getValues("difficulty") ? true : false
       )!;
       const { data: { data } = { data: { rows: [], count: 0 } } } = await getLessons({
-        gameType: GAME_TYPE.WORD_BALLOON,
+        gameType: GAME_TYPE.BUST_A_WORD,
       });
-      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase(), {
-        shouldValidate: true,
-      });
+      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase());
     }
     setOpenConfirm(!openConfirm);
   };
@@ -203,10 +217,9 @@ export const WordBalloonEditor = () => {
   const handleLessonSelect = async (id: number) => {
     const { data: { data: lesson } = {} } = await getLesson(id);
     if (!lesson) return;
-    const { asset } = lesson as { asset: WordBalloonAsset };
+    const { asset } = lesson as { asset: BustAWordAsset };
     reset({
       id: lesson.id,
-      behavior: asset.behavior,
       curriculum: lesson.curriculum,
       difficulty: lesson.difficulty,
       gameType: lesson.gameType,
@@ -214,21 +227,12 @@ export const WordBalloonEditor = () => {
       unitId: lesson.unitId,
     });
 
-    dispatch(removeAllBalloon());
+    dispatch(removeAllSphere());
 
-    asset.balloons
-      .filter((x) => x.type === "E")
-      .forEach((balloon, indexCount) => {
-        const indexName = balloonAssets.findIndex((x) => x.name === balloon.name);
-        dispatch(assignBalloon({ balloonId: `E-${indexName}-${indexCount}-}`, boardId: balloon.position }));
-      });
-
-    asset.balloons
-      .filter((x) => x.type === "W")
-      .forEach((balloon, indexCount) => {
-        const indexName = balloonAssets.findIndex((x) => x.name === balloon.name);
-        dispatch(assignBalloon({ balloonId: `W-${indexName}-${indexCount}-}`, boardId: balloon.position }));
-      });
+    asset.spheres.forEach((balloon, indexCount) => {
+      const indexName = sphereAssets.findIndex((x) => x.name === balloon.name);
+      dispatch(assignSphere({ sphereId: `${indexName}-${indexCount}-}`, boardId: indexCount.toString() }));
+    });
 
     const backgroud = backgroundAssets.find((x) => x.name === lesson.asset.bg);
     setSelectedBackground(backgroud);
@@ -247,9 +251,10 @@ export const WordBalloonEditor = () => {
   const handleClear = () => {
     if (window.confirm("Are you sure you want to clear all input fields?")) {
       reset();
-      dispatch(removeAllBalloon());
+      dispatch(removeAllSphere());
       setSelectedBackground(backgroundAssets[0]);
       setSelectedCannon(cannonAssets[0]);
+      setWordsArray([]);
     }
   };
 
@@ -330,23 +335,26 @@ export const WordBalloonEditor = () => {
             <Grid container spacing={2} sx={{ height: "100%" }} direction="column" wrap="nowrap">
               <Grid container spacing={2} item xs={11}>
                 <Grid item xs={3}>
-                  <Controller
-                    control={control}
-                    name="behavior"
-                    render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel size="small" shrink>
-                          Behavior
-                        </InputLabel>
-                        <Select label="Behavior" size="small" native {...field}>
-                          <option value={0}>STANDING STILL</option>
-                          <option value={1}>HORIZONTAL</option>
-                          <option value={2}>VERTICAL</option>
-                          <option value={3}>RANDOM</option>
-                        </Select>
-                      </FormControl>
-                    )}
+                  <TextField
+                    size="small"
+                    label="Total Lines"
+                    fullWidth
+                    type="number"
+                    inputProps={{ min: 0, max: 10 }}
+                    {...register("totalLines", { valueAsNumber: true })}
                   />
+                  <FormGroup>
+                    {wordsArray.map((w, i) => (
+                      <WordSwitch
+                        key={i}
+                        checked={w}
+                        index={i}
+                        onChange={(index, value) =>
+                          setWordsArray((prev) => [...prev.slice(0, index), value, ...prev.slice(index + 1)])
+                        }
+                      />
+                    ))}
+                  </FormGroup>
                 </Grid>
                 <Grid item xs={6}>
                   <Box
@@ -359,7 +367,15 @@ export const WordBalloonEditor = () => {
                       borderRadius: "4px",
                     }}
                   >
-                    <Board position="absolute" width="90%" top="25%" left="5%" zIndex="999" assets={balloonAssets} />
+                    <Board
+                      position="absolute"
+                      width="90%"
+                      top="18%"
+                      left="5%"
+                      zIndex="999"
+                      assets={sphereAssets}
+                      rows={totalLines ?? 0}
+                    />
                     {assets && (
                       <>
                         <img
@@ -392,7 +408,7 @@ export const WordBalloonEditor = () => {
                 <Grid item xs={3}>
                   {assets && (
                     <>
-                      <BalloonColor imgs={balloonAssets} />
+                      <SphereColor imgs={sphereAssets} />
                       <ImageSelect
                         label="Cannon shape"
                         imgs={cannonAssets}
@@ -431,31 +447,28 @@ export const WordBalloonEditor = () => {
                   <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
                 </Grid>
               </Grid>
-              <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
+              <DragOverlay>{activeId ? <SphereDraggable id={activeId} assets={sphereAssets} /> : null}</DragOverlay>
             </Grid>
           </DndContext>
         </EditorScene.Mid>
         <EditorScene.Right xs={2}>
           <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Controller
-                control={control}
-                name="difficulty"
-                render={({ field }) => (
-                  <FormControl>
-                    <InputLabel size="small" shrink>
-                      Difficulty
-                    </InputLabel>
-                    <Select label="Difficulty" size="small" native {...field}>
-                      {Object.entries(LESSON_DIFFICULTY).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {key.toUpperCase()}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              />
+              <FormControl>
+                <InputLabel size="small">Difficulty</InputLabel>
+                <Select
+                  label="Difficulty"
+                  size="small"
+                  {...register("difficulty", { required: "This field is required", valueAsNumber: true })}
+                  native
+                >
+                  {Object.entries(LESSON_DIFFICULTY).map(([key, value]) => (
+                    <option key={key} value={value}>
+                      {key.toUpperCase()}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
             </Box>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Button color="primary" variant="contained" onClick={handleClear}>
@@ -478,22 +491,14 @@ export const WordBalloonEditor = () => {
       <Dialog open={openConfirm} onClose={handleToggleConfirm}>
         <DialogTitle>Confirm Save</DialogTitle>
         <DialogContent>
-          <Controller
-            control={control}
-            name="name"
-            rules={{ required: "This field is required" }}
-            render={({ field }) => (
-              <TextField
-                size="small"
-                label="Name"
-                fullWidth
-                margin="dense"
-                error={!!errors.name}
-                helperText={errors.name ? errors.name.message : " "}
-                InputLabelProps={{ shrink: true }}
-                {...field}
-              />
-            )}
+          <TextField
+            size="small"
+            label="Name"
+            fullWidth
+            margin="dense"
+            error={!!errors.name}
+            helperText={errors.name ? errors.name.message : " "}
+            {...register("name", { required: "This field is required" })}
           />
         </DialogContent>
         <DialogActions>
@@ -510,7 +515,7 @@ export const WordBalloonEditor = () => {
   }
 
   function removeAssignment(id: string) {
-    dispatch(removeBalloon(id));
+    dispatch(removeSphere(id));
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -523,7 +528,7 @@ export const WordBalloonEditor = () => {
       if (containsCollisionWithRemoveDroppable) {
         removeAssignment(active.id.toString());
       } else if (over.id && active.id) {
-        dispatch(assignBalloon({ balloonId: active.id.toString(), boardId: over.id.toString() }));
+        dispatch(assignSphere({ sphereId: active.id.toString(), boardId: over.id.toString() }));
       }
     } else {
       if (assignmentsMap[active.id]) {
@@ -532,8 +537,8 @@ export const WordBalloonEditor = () => {
     }
   }
 
-  function transferMapToBalloonAssets(a: AssignmentsMap, b: AssetImage[]): Balloon[] {
-    const output: Balloon[] = [];
+  function transferMapToAssets(a: AssignmentsMap, b: AssetImage[]): Sphere[] {
+    const output: Sphere[] = [];
 
     for (const [key, value] of Object.entries(a)) {
       if (value === undefined) {
@@ -541,10 +546,9 @@ export const WordBalloonEditor = () => {
       }
 
       const [type, index] = key.split("-");
-      const position = value;
       const { name } = b[parseInt(index)];
 
-      output.push({ type, position, name });
+      output.push({ type, name });
     }
 
     return output;
