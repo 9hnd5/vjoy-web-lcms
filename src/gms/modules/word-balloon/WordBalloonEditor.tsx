@@ -204,15 +204,18 @@ export const WordBalloonEditor = () => {
     const { data: { data: lesson } = {} } = await getLesson(id);
     if (!lesson) return;
     const { asset } = lesson as { asset: WordBalloonAsset };
-    reset({
-      id: lesson.id,
-      behavior: asset.behavior,
-      curriculum: lesson.curriculum,
-      difficulty: lesson.difficulty,
-      gameType: lesson.gameType,
-      name: lesson.name,
-      unitId: lesson.unitId,
-    });
+    reset(
+      {
+        id: lesson.id,
+        behavior: asset.behavior,
+        curriculum: lesson.curriculum,
+        difficulty: lesson.difficulty,
+        gameType: lesson.gameType,
+        name: lesson.name,
+        unitId: lesson.unitId,
+      },
+      { keepDefaultValues: true }
+    );
 
     dispatch(removeAllBalloon());
 
