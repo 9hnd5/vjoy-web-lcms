@@ -544,16 +544,19 @@ export const BustAWordEditor = () => {
 
   function transferMapToAssets(a: AssignmentsMap, b: AssetImage[]): Sphere[] {
     const output: Sphere[] = [];
-
+    let count = 1;
+    
     for (const [key, value] of Object.entries(a)) {
+      if (count > totalLines!) break;
       if (value === undefined) {
         continue;
       }
 
-      const [type, index] = key.split("-");
+      const [index] = key.split("-");
       const { name } = b[parseInt(index)];
 
-      output.push({ type, name });
+      output.push({ type: wordsArray[count-1] ? "W" : "E", name });
+      count++;
     }
 
     return output;
