@@ -193,7 +193,7 @@ export const WordBalloonEditor = () => {
       const { data: { data } = { data: { rows: [], count: 0 } } } = await getLessons({
         gameType: GAME_TYPE.WORD_BALLOON,
       });
-      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase(), {
+      setValue("name", `${levelId}_aquarium_wordballoon_${difficulty}_${data.count + 1}`.toLowerCase(), {
         shouldValidate: true,
       });
     }
@@ -428,7 +428,7 @@ export const WordBalloonEditor = () => {
                   </Box>
                   <input type="hidden" {...register("curriculum", { required: "This field is required" })} />
                   <Box sx={{ color: "#d32f2f" }}>{errors?.curriculum?.message}</Box>
-                  <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
+                  <Box>{curriculum?.name}</Box>
                 </Grid>
               </Grid>
               <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>

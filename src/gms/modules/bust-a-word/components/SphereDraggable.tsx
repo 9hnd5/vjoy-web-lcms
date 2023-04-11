@@ -1,10 +1,10 @@
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Grid, Typography, styled } from "@mui/material";
+import { Grid, styled, Typography } from "@mui/material";
 import { blueGrey } from "@mui/material/colors";
+import { AssetImage } from "gms/ultils/types";
 import { useMemo } from "react";
 import { WORD_ON_SPHERE } from "../bustAWordContant";
-import { AssetImage } from "gms/ultils/types";
 
 const ImageItem = styled(Grid)(() => ({
   margin: "5px",
@@ -19,14 +19,15 @@ const ImageItem = styled(Grid)(() => ({
 
 type SphereProps = {
   id: string;
+  word?: boolean;
   assets: AssetImage[];
 };
 
-export const SphereDraggable = ({ id, assets }: SphereProps) => {
+export const SphereDraggable = ({ id, word = false, assets }: SphereProps) => {
   const { attributes, active, listeners, setNodeRef, transform } = useDraggable({
     id,
   });
-  const [word, idx] = id.split("-");
+  const [idx] = id.split("-");
   const style = useMemo(
     () =>
       transform
@@ -40,8 +41,8 @@ export const SphereDraggable = ({ id, assets }: SphereProps) => {
   );
   return (
     <ImageItem item id={id} ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      <img src={assets[parseInt(idx)].imgSrc} style={{ height: "40px", objectFit: "cover", display: "block" }} />
-      {word && word === "W" && (
+      <img src={assets[parseInt(idx)].imgSrc} style={{ height: "35px", objectFit: "cover", display: "block" }} />
+      {word && (
         <Typography
           variant="button"
           sx={{

@@ -39,7 +39,7 @@ export const SphereColor = ({ imgs }: SphereColorProps) => {
         <Grid container sx={{ overflowX: "auto" }}>
           <Grid item container direction="row" wrap="nowrap">
             {imgs.map((image, index) => (
-              <SphereDraggable key={`${index}`} id={`${index}-${countIds(`${index}-`)}`} assets={imgs} />
+              <SphereDraggable key={index} id={`${index}-${countIds(`${index}-`)}`} assets={imgs} />
             ))}
           </Grid>
         </Grid>

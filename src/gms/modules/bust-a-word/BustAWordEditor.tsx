@@ -50,6 +50,7 @@ import { useGetUnitsQuery } from "gms/services/unitService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constants";
 import { csvToJson } from "gms/ultils/file";
 import { AssetImage } from "gms/ultils/types";
+import { isNil } from "lodash";
 import React, { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -57,9 +58,9 @@ import { useNavigate } from "react-router-dom";
 import { assignSphere, removeAllSphere, removeSphere, selectAllAssignedSpheres } from "./bustAWordSlice";
 import { AssignmentsMap, FormType } from "./bustAWordType";
 import { Board } from "./components/Board";
+import { BoardRowDraggable } from "./components/BoardRowDraggable";
 import { LessonModal } from "./components/LessonModal";
 import { SphereColor } from "./components/SphereColor";
-import { SphereDraggable } from "./components/SphereDraggable";
 import { WordSwitch } from "./components/WordSwitch";
 
 export const BustAWordEditor = () => {
@@ -209,7 +210,7 @@ export const BustAWordEditor = () => {
       const { data: { data } = { data: { rows: [], count: 0 } } } = await getLessons({
         gameType: GAME_TYPE.BUST_A_WORD,
       });
-      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase());
+      setValue("name", `${levelId}_aquarium_bustaword_${difficulty}_${data.count + 1}`.toLowerCase());
     }
     setOpenConfirm(!openConfirm);
   };
@@ -340,7 +341,7 @@ export const BustAWordEditor = () => {
                     label="Total Lines"
                     fullWidth
                     type="number"
-                    inputProps={{ min: 0, max: 10 }}
+                    inputProps={{ min: 0, max: 6 }}
                     {...register("totalLines", { valueAsNumber: true })}
                   />
                   <FormGroup>
@@ -375,6 +376,7 @@ export const BustAWordEditor = () => {
                       zIndex="999"
                       assets={sphereAssets}
                       rows={totalLines ?? 0}
+                      words={wordsArray}
                     />
                     {assets && (
                       <>
@@ -444,10 +446,10 @@ export const BustAWordEditor = () => {
                   </Box>
                   <input type="hidden" {...register("curriculum", { required: "This field is required" })} />
                   <Box sx={{ color: "#d32f2f" }}>{errors?.curriculum?.message}</Box>
-                  <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
+                  <Box>{curriculum?.name}</Box>
                 </Grid>
               </Grid>
-              <DragOverlay>{activeId ? <SphereDraggable id={activeId} assets={sphereAssets} /> : null}</DragOverlay>
+              <DragOverlay>{activeId ? <BoardRowDraggable id={activeId} assets={sphereAssets} /> : null}</DragOverlay>
             </Grid>
           </DndContext>
         </EditorScene.Mid>
@@ -527,7 +529,7 @@ export const BustAWordEditor = () => {
     if (over) {
       if (containsCollisionWithRemoveDroppable) {
         removeAssignment(active.id.toString());
-      } else if (over.id && active.id) {
+      } else if (!isNil(over.id) && !isNil(active.id)) {
         dispatch(assignSphere({ sphereId: active.id.toString(), boardId: over.id.toString() }));
       }
     } else {
