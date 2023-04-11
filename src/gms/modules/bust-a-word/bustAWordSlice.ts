@@ -40,15 +40,13 @@ export const { assignSphere, removeSphere, removeAllSphere } = counterSlice.acti
 export const selectAllAssignedSpheres = (state: RootState) => state.bustAWord.assignmentsMap;
 export const selectAssignedSpheres = (state: RootState) => {
   return (id: string) => {
-    const sphereIds = [];
-
     for (const [sphereId, boardId] of Object.entries(state.bustAWord.assignmentsMap)) {
       if (boardId === id) {
-        sphereIds.push(sphereId);
+        return sphereId;
       }
     }
 
-    return sphereIds;
+    return;
   };
 };
 export const selectAssignedIdCount = (state: RootState) => {

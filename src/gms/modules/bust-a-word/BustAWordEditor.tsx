@@ -50,6 +50,7 @@ import { useGetUnitsQuery } from "gms/services/unitService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constants";
 import { csvToJson } from "gms/ultils/file";
 import { AssetImage } from "gms/ultils/types";
+import { isNil } from "lodash";
 import React, { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -57,9 +58,9 @@ import { useNavigate } from "react-router-dom";
 import { assignSphere, removeAllSphere, removeSphere, selectAllAssignedSpheres } from "./bustAWordSlice";
 import { AssignmentsMap, FormType } from "./bustAWordType";
 import { Board } from "./components/Board";
+import { BoardRowDraggable } from "./components/BoardRowDraggable";
 import { LessonModal } from "./components/LessonModal";
 import { SphereColor } from "./components/SphereColor";
-import { SphereDraggable } from "./components/SphereDraggable";
 import { WordSwitch } from "./components/WordSwitch";
 
 export const BustAWordEditor = () => {
@@ -113,11 +114,13 @@ export const BustAWordEditor = () => {
     },
   });
 
-  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+  const [acceptedFiles, setAcceptedFiles] = useState<File[]>([]);
+  const { getRootProps, getInputProps } = useDropzone({
     onDrop: async (acceptFiles) => {
       const data = await csvToJson<Curriculum>(acceptFiles[0]);
       const name = acceptFiles[0].name;
       setValue("curriculum", { name, data }, { shouldValidate: true });
+      setAcceptedFiles((prevFiles) => [...prevFiles, acceptFiles[0]]);
     },
     accept: {
       "text/csv": [".csv"],
@@ -252,6 +255,7 @@ export const BustAWordEditor = () => {
     if (window.confirm("Are you sure you want to clear all input fields?")) {
       reset();
       dispatch(removeAllSphere());
+      setAcceptedFiles([]);
       setSelectedBackground(backgroundAssets[0]);
       setSelectedCannon(cannonAssets[0]);
       setWordsArray([]);
@@ -375,6 +379,7 @@ export const BustAWordEditor = () => {
                       zIndex="999"
                       assets={sphereAssets}
                       rows={totalLines ?? 0}
+                      words={wordsArray}
                     />
                     {assets && (
                       <>
@@ -447,7 +452,7 @@ export const BustAWordEditor = () => {
                   <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
                 </Grid>
               </Grid>
-              <DragOverlay>{activeId ? <SphereDraggable id={activeId} assets={sphereAssets} /> : null}</DragOverlay>
+              <DragOverlay>{activeId ? <BoardRowDraggable id={activeId} assets={sphereAssets} /> : null}</DragOverlay>
             </Grid>
           </DndContext>
         </EditorScene.Mid>
@@ -527,7 +532,7 @@ export const BustAWordEditor = () => {
     if (over) {
       if (containsCollisionWithRemoveDroppable) {
         removeAssignment(active.id.toString());
-      } else if (over.id && active.id) {
+      } else if (!isNil(over.id) && !isNil(active.id)) {
         dispatch(assignSphere({ sphereId: active.id.toString(), boardId: over.id.toString() }));
       }
     } else {

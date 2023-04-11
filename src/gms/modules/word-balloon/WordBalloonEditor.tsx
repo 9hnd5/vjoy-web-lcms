@@ -110,11 +110,13 @@ export const WordBalloonEditor = () => {
     },
   });
 
-  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+  const [acceptedFiles, setAcceptedFiles] = useState<File[]>([]);
+  const { getRootProps, getInputProps } = useDropzone({
     onDrop: async (acceptFiles) => {
       const data = await csvToJson<Curriculum>(acceptFiles[0]);
       const name = acceptFiles[0].name;
       setValue("curriculum", { name, data }, { shouldValidate: true });
+      setAcceptedFiles((prevFiles) => [...prevFiles, acceptFiles[0]]);
     },
     accept: {
       "text/csv": [".csv"],
@@ -248,6 +250,7 @@ export const WordBalloonEditor = () => {
     if (window.confirm("Are you sure you want to clear all input fields?")) {
       reset();
       dispatch(removeAllBalloon());
+      setAcceptedFiles([]);
       setSelectedBackground(backgroundAssets[0]);
       setSelectedCannon(cannonAssets[0]);
     }
