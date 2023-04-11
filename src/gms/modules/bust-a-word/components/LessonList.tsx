@@ -1,6 +1,6 @@
 import { Box, Chip } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { LESSON_STATUS, useGetLessonsQuery } from "gms/services/lessonService";
+import { GAME_TYPE, LESSON_STATUS, useGetLessonsQuery } from "gms/services/lessonService";
 const columns: GridColDef[] = [
   {
     field: "id",
@@ -35,7 +35,7 @@ type Props = {
 export const LessonList = (props: Props) => {
   const { onSelect } = props;
   const { data: { data } = { data: { rows: [], count: 0 } }, isLoading } = useGetLessonsQuery({
-    gameType: "WORD_BALLOON",
+    gameType: GAME_TYPE.BUST_A_WORD,
   });
 
   return (

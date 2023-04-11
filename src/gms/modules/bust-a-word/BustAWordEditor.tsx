@@ -114,13 +114,11 @@ export const BustAWordEditor = () => {
     },
   });
 
-  const [acceptedFiles, setAcceptedFiles] = useState<File[]>([]);
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     onDrop: async (acceptFiles) => {
       const data = await csvToJson<Curriculum>(acceptFiles[0]);
       const name = acceptFiles[0].name;
       setValue("curriculum", { name, data }, { shouldValidate: true });
-      setAcceptedFiles((prevFiles) => [...prevFiles, acceptFiles[0]]);
     },
     accept: {
       "text/csv": [".csv"],
@@ -212,7 +210,7 @@ export const BustAWordEditor = () => {
       const { data: { data } = { data: { rows: [], count: 0 } } } = await getLessons({
         gameType: GAME_TYPE.BUST_A_WORD,
       });
-      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase());
+      setValue("name", `${levelId}_aquarium_bustaword_${difficulty}_${data.count + 1}`.toLowerCase());
     }
     setOpenConfirm(!openConfirm);
   };
@@ -255,7 +253,6 @@ export const BustAWordEditor = () => {
     if (window.confirm("Are you sure you want to clear all input fields?")) {
       reset();
       dispatch(removeAllSphere());
-      setAcceptedFiles([]);
       setSelectedBackground(backgroundAssets[0]);
       setSelectedCannon(cannonAssets[0]);
       setWordsArray([]);
@@ -344,7 +341,7 @@ export const BustAWordEditor = () => {
                     label="Total Lines"
                     fullWidth
                     type="number"
-                    inputProps={{ min: 0, max: 10 }}
+                    inputProps={{ min: 0, max: 6 }}
                     {...register("totalLines", { valueAsNumber: true })}
                   />
                   <FormGroup>
@@ -449,7 +446,7 @@ export const BustAWordEditor = () => {
                   </Box>
                   <input type="hidden" {...register("curriculum", { required: "This field is required" })} />
                   <Box sx={{ color: "#d32f2f" }}>{errors?.curriculum?.message}</Box>
-                  <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
+                  <Box>{curriculum?.name}</Box>
                 </Grid>
               </Grid>
               <DragOverlay>{activeId ? <BoardRowDraggable id={activeId} assets={sphereAssets} /> : null}</DragOverlay>

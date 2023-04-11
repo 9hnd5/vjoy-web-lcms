@@ -110,13 +110,11 @@ export const WordBalloonEditor = () => {
     },
   });
 
-  const [acceptedFiles, setAcceptedFiles] = useState<File[]>([]);
-  const { getRootProps, getInputProps } = useDropzone({
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     onDrop: async (acceptFiles) => {
       const data = await csvToJson<Curriculum>(acceptFiles[0]);
       const name = acceptFiles[0].name;
       setValue("curriculum", { name, data }, { shouldValidate: true });
-      setAcceptedFiles((prevFiles) => [...prevFiles, acceptFiles[0]]);
     },
     accept: {
       "text/csv": [".csv"],
@@ -195,7 +193,7 @@ export const WordBalloonEditor = () => {
       const { data: { data } = { data: { rows: [], count: 0 } } } = await getLessons({
         gameType: GAME_TYPE.WORD_BALLOON,
       });
-      setValue("name", `${levelId}_aquarium_wordballon_${difficulty}_${data.count + 1}`.toLowerCase(), {
+      setValue("name", `${levelId}_aquarium_wordballoon_${difficulty}_${data.count + 1}`.toLowerCase(), {
         shouldValidate: true,
       });
     }
@@ -250,7 +248,6 @@ export const WordBalloonEditor = () => {
     if (window.confirm("Are you sure you want to clear all input fields?")) {
       reset();
       dispatch(removeAllBalloon());
-      setAcceptedFiles([]);
       setSelectedBackground(backgroundAssets[0]);
       setSelectedCannon(cannonAssets[0]);
     }
@@ -431,7 +428,7 @@ export const WordBalloonEditor = () => {
                   </Box>
                   <input type="hidden" {...register("curriculum", { required: "This field is required" })} />
                   <Box sx={{ color: "#d32f2f" }}>{errors?.curriculum?.message}</Box>
-                  <Box>{acceptedFiles.length || curriculum ? curriculum.name : ""}</Box>
+                  <Box>{curriculum?.name}</Box>
                 </Grid>
               </Grid>
               <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
