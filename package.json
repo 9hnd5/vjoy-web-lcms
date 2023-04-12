@@ -31,7 +31,9 @@
   },
   "peerDependencies": {
     "@mui/material": "^5.11.16",
-    "@mui/icons-material": "^5.11.16"
+    "@mui/icons-material": "^5.11.16",
+    "react-hook-form": "^7.43.9",
+    "react-router-dom": "^6.10.0"
   },
   "devDependencies": {
     "@babel/code-frame": "^7.18.6",
