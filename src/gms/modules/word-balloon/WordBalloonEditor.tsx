@@ -19,13 +19,14 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  Grid,
   InputLabel,
   Select,
   TextField,
-  Grid,
 } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
-import { EditorScene } from "gms/components/EditorScene";
+import { BlurLoading } from "gms/components/BlurLoading";
+import { EditorScene1 } from "gms/components/EditorScene1";
 import LoadingComponent from "gms/components/LoadingComponent";
 import { useAppDispatch } from "gms/hooks/useAppDispatch";
 import { useAppSelector } from "gms/hooks/useAppSelector";
@@ -43,13 +44,12 @@ import {
   useUpdateLessonMutation,
   WordBalloonAsset,
 } from "gms/services/lessonService";
-import { useGetLevelsQuery } from "gms/services/levelService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constants";
 import { csvToJson } from "gms/ultils/file";
-import React, { useState } from "react";
+import { AssetImage } from "gms/ultils/types";
+import { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { SubmitHandler, useForm, Controller } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Controller, FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { BalloonColor } from "./components/BalloonColor";
 import { BalloonDraggable } from "./components/BalloonDraggable";
 import { Board } from "./components/Board";
@@ -57,11 +57,8 @@ import { ImageSelect } from "./components/ImageSelect";
 import { LessonModal } from "./components/LessonModal";
 import { assignBalloon, removeAllBalloon, removeBalloon, selectAllAssignedBalloons } from "./wordBalloonSlice";
 import { AssignmentsMap, FormType } from "./wordBalloonType";
-import { useGetUnitsQuery } from "gms/services/unitService";
-import { AssetImage } from "gms/ultils/types";
 
 export const WordBalloonEditor = () => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const notify = useNotification();
@@ -82,14 +79,20 @@ export const WordBalloonEditor = () => {
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
-  const [getLesson] = useLazyGetLessonQuery();
+  const [getLesson, { isFetching: isLessonLoading = true }] = useLazyGetLessonQuery();
 
   const [getLessons, { isFetching: isLessonsLoading }] = useLazyGetLessonsQuery();
 
-  const { data: { data: level } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery();
-
-  const { data: { data: unit } = { data: { rows: [], count: 0 } } } = useGetUnitsQuery();
-
+  const methods = useForm<FormType>({
+    defaultValues: {
+      unitId: 1,
+      levelId: "eng-preA1",
+      difficulty: LESSON_DIFFICULTY.EASY,
+      behavior: 0,
+      gameType: GAME_TYPE.WORD_BALLOON,
+      curriculum: null as any,
+    },
+  });
   const {
     handleSubmit,
     register,
@@ -100,17 +103,9 @@ export const WordBalloonEditor = () => {
     watch,
     control,
     formState: { errors },
-  } = useForm<FormType>({
-    defaultValues: {
-      unitId: 1,
-      levelId: "eng-preA1",
-      difficulty: LESSON_DIFFICULTY.EASY,
-      behavior: 0,
-      gameType: GAME_TYPE.WORD_BALLOON,
-    },
-  });
+  } = methods;
 
-  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
     onDrop: async (acceptFiles) => {
       const data = await csvToJson<Curriculum>(acceptFiles[0]);
       const name = acceptFiles[0].name;
@@ -257,71 +252,16 @@ export const WordBalloonEditor = () => {
   };
 
   return (
-    <React.Fragment>
-      <EditorScene>
-        <EditorScene.Left xs={2}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
-            <Controller
-              control={control}
-              name="levelId"
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <InputLabel size="small">Level</InputLabel>
-                  <Select label="Level" size="small" native disabled {...field}>
-                    {level.rows.map((level) => (
-                      <option key={level.id} value={level.id}>
-                        {level.name}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-            <Controller
-              control={control}
-              name="unitId"
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <InputLabel size="small">Unit</InputLabel>
-                  <Select label="Unit" size="small" native disabled {...field}>
-                    {unit.rows.map((unit) => (
-                      <option key={unit.id} value={unit.id}>
-                        {unit.name}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-            <Controller
-              control={control}
-              name="gameType"
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <InputLabel size="small">Lesson List</InputLabel>
-                  <Select
-                    label="Lesson list"
-                    size="small"
-                    native
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      const selectedValue = e.target.value as string;
-                      navigate(`/gms/${selectedValue.toLowerCase().replaceAll("_", "-")}`);
-                    }}
-                  >
-                    {Object.entries(GAME_TYPE).map(([key, value]) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-          </Box>
-        </EditorScene.Left>
-        <EditorScene.Mid xs={8}>
+    <BlurLoading isLoading={isLessonLoading}>
+      <FormProvider {...methods}>
+        <EditorScene1
+          isSaving={isLessonsLoading}
+          isPublising={isUpdating}
+          onNew={handleClear}
+          onSave={handleToggleConfirm}
+          onLoad={handleToggleLesson}
+          onPublish={handlePubic}
+        >
           <DndContext
             sensors={sensors}
             modifiers={[restrictToWindowEdges]}
@@ -341,7 +281,13 @@ export const WordBalloonEditor = () => {
                         <InputLabel size="small" shrink>
                           Behavior
                         </InputLabel>
-                        <Select label="Behavior" size="small" native {...field}>
+                        <Select
+                          label="Behavior"
+                          size="small"
+                          native
+                          {...field}
+                          onChange={(e) => field.onChange(+e.target.value)}
+                        >
                           <option value={0}>STANDING STILL</option>
                           <option value={1}>HORIZONTAL</option>
                           <option value={2}>VERTICAL</option>
@@ -437,47 +383,11 @@ export const WordBalloonEditor = () => {
               <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
             </Grid>
           </DndContext>
-        </EditorScene.Mid>
-        <EditorScene.Right xs={2}>
-          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Controller
-                control={control}
-                name="difficulty"
-                render={({ field }) => (
-                  <FormControl>
-                    <InputLabel size="small" shrink>
-                      Difficulty
-                    </InputLabel>
-                    <Select label="Difficulty" size="small" native {...field}>
-                      {Object.entries(LESSON_DIFFICULTY).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {key.toUpperCase()}
-                        </option>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              />
-            </Box>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Button color="primary" variant="contained" onClick={handleClear}>
-                New
-              </Button>
-              <Button color="primary" variant="contained" onClick={handleToggleLesson}>
-                Load
-              </Button>
-              <Button color="primary" variant="contained" onClick={handleToggleConfirm} disabled={isLessonsLoading}>
-                Save
-              </Button>
-              <Button color="success" variant="contained" disabled={isUpdating} onClick={handlePubic}>
-                Publish
-              </Button>
-            </Box>
-          </Box>
-        </EditorScene.Right>
-      </EditorScene>
+        </EditorScene1>
+      </FormProvider>
+
       <LessonModal open={open} onClose={handleToggleLesson} onSelect={handleLessonSelect} />
+
       <Dialog open={openConfirm} onClose={handleToggleConfirm}>
         <DialogTitle>Confirm Save</DialogTitle>
         <DialogContent>
@@ -505,7 +415,7 @@ export const WordBalloonEditor = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
+    </BlurLoading>
   );
 
   function handleDragStart(event: DragStartEvent) {
