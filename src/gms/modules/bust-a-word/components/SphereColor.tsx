@@ -11,7 +11,8 @@ const ImageContainer = styled("div")(() => ({
   border: `solid 3px ${blueGrey[300]}`,
   borderRadius: "4px",
   marginBottom: "10px",
-  overflow: "hidden",
+  overflow: "scroll",
+  padding: "5px 0",
 }));
 
 type SphereColorProps = {
@@ -36,12 +37,10 @@ export const SphereColor = ({ imgs }: SphereColorProps) => {
         {upperCase("Sphere color")}
       </InputLabel>
       <ImageContainer ref={setNodeRef}>
-        <Grid container sx={{ overflowX: "auto" }}>
-          <Grid item container direction="row" wrap="nowrap">
-            {imgs.map((image, index) => (
-              <SphereDraggable key={index} id={`${index}-${countIds(`${index}-`)}`} assets={imgs} />
-            ))}
-          </Grid>
+        <Grid container direction="row" wrap="nowrap">
+          {imgs.map((image, index) => (
+            <SphereDraggable key={index} id={`${index}-${countIds(`${index}-`)}`} assets={imgs} />
+          ))}
         </Grid>
       </ImageContainer>
     </>
