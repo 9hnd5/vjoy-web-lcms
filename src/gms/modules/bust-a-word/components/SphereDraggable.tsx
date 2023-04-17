@@ -10,6 +10,7 @@ const ImageItem = styled(Grid)(() => ({
   margin: "5px",
   position: "relative",
   display: "inline-block",
+  userSelect: "none",
   "&:hover": {
     cursor: "pointer",
     opacity: 0.8,

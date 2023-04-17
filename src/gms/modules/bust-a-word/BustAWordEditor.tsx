@@ -65,7 +65,7 @@ export const BustAWordEditor = () => {
 
   const { data: assetsResponse = { data: [] }, isFetching } = useGetAssetsQuery({
     bucket: ASSET_BUCKET,
-    folder: ASSET_FOLDER.WORD_BALLOON,
+    folder: ASSET_FOLDER.BUST_A_WORD,
   });
   const [selectedBackground, setSelectedBackground] = useState<AssetImage>();
   const [selectedCannon, setSelectedCannon] = useState<AssetImage>();
@@ -147,8 +147,8 @@ export const BustAWordEditor = () => {
   });
 
   const backgroundAssets = assets.filter((item) => item.url.includes("/bg/"));
-  const sphereAssets = assets.filter((item) => item.url.includes("/balloon/"));
   const cannonAssets = assets.filter((item) => item.url.includes("/cannon/"));
+  const sphereAssets = assets.filter((item) => item.url.includes("/sphere/"));
 
   if (backgroundAssets.length && !selectedBackground) setSelectedBackground(backgroundAssets[0]);
   if (cannonAssets.length && !selectedCannon) setSelectedCannon(cannonAssets[0]);
@@ -219,16 +219,20 @@ export const BustAWordEditor = () => {
         gameType: lesson.gameType,
         name: lesson.name,
         unitId: lesson.unitId,
+        totalLines: asset.spheres.length,
       },
       { keepDefaultValues: true }
     );
 
     dispatch(removeAllSphere());
 
-    asset.spheres.forEach((balloon, indexCount) => {
-      const indexName = sphereAssets.findIndex((x) => x.name === balloon.name);
+    const wordArr: boolean[] = [];
+    asset.spheres.forEach((bubble, indexCount) => {
+      const indexName = sphereAssets.findIndex((x) => x.name === bubble.name);
       dispatch(assignSphere({ sphereId: `${indexName}-${indexCount}-}`, boardId: indexCount.toString() }));
+      wordArr.push(bubble.type === "W");
     });
+    setWordsArray(wordArr);
 
     const backgroud = backgroundAssets.find((x) => x.name === lesson.asset.bg);
     setSelectedBackground(backgroud);
@@ -339,7 +343,7 @@ export const BustAWordEditor = () => {
                             height: "100px",
                             objectFit: "fill",
                             position: "absolute",
-                            bottom: "14%",
+                            bottom: "12%",
                             left: "calc(50% - 50px)",
                           }}
                         />

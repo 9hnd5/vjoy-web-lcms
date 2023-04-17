@@ -39,16 +39,13 @@ export const BoardRowDraggable = ({ id, word = false, assets }: BoardRowProps) =
   for (let i = 0; i < 6; i++) {
     spheres.push(
       <Box key={i} sx={{ position: "relative" }}>
-        <img
-          src={assets[parseInt(idx)].imgSrc}
-          style={{ height: "35px", objectFit: "cover", display: "block" }}
-        />
+        <img src={assets[parseInt(idx)].imgSrc} style={{ height: "35px", objectFit: "cover", display: "block" }} />
         {word && (
           <Typography
             variant="button"
             sx={{
               position: "absolute",
-              top: "35%",
+              top: "45%",
               left: "50%",
               transform: "translate(-50%, -50%)",
               color: "#fff",
