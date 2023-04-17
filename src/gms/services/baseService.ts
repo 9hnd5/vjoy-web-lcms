@@ -21,7 +21,7 @@ export const baseService = createApi({
       headers.set("api-token", apiToken);
       //Hard admin accessToken;
       const accessToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGVDb2RlIjoiYWRtaW4iLCJpYXQiOjE2NzkyOTU4OTMsImV4cCI6MTY3OTI5NjE5M30.Fu0qrjih1tPFIxpuCPkmT-bdpPVwBtnjRbl2AIsh_QI";
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGVJZCI6ImFkbWluIiwiaWF0IjoxNjgxNjk4NzY2LCJleHAiOjM4MjkxODI0MTN9.U15mdIIoYc3caISWYLGXCTjg1-ZLTOhvxOEGaRJO32w";
       headers.set("authorization", `Bearer ${accessToken}`);
       return headers;
     },

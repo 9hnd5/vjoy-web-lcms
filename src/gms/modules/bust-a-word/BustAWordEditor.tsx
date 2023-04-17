@@ -18,15 +18,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
   FormGroup,
   Grid,
-  InputLabel,
-  Select,
   TextField,
 } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
-import { EditorScene } from "gms/components/EditorScene";
+import { BlurLoading } from "gms/components/BlurLoading";
+import { EditorScene1 } from "gms/components/EditorScene1";
 import { ImageSelect } from "gms/components/ImageSelect";
 import LoadingComponent from "gms/components/LoadingComponent";
 import { useAppDispatch } from "gms/hooks/useAppDispatch";
@@ -45,16 +43,13 @@ import {
   useLazyGetLessonsQuery,
   useUpdateLessonMutation,
 } from "gms/services/lessonService";
-import { useGetLevelsQuery } from "gms/services/levelService";
-import { useGetUnitsQuery } from "gms/services/unitService";
 import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constants";
 import { csvToJson } from "gms/ultils/file";
 import { AssetImage } from "gms/ultils/types";
 import { isNil } from "lodash";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Controller, FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { assignSphere, removeAllSphere, removeSphere, selectAllAssignedSpheres } from "./bustAWordSlice";
 import { AssignmentsMap, FormType } from "./bustAWordType";
 import { Board } from "./components/Board";
@@ -64,7 +59,6 @@ import { SphereColor } from "./components/SphereColor";
 import { WordSwitch } from "./components/WordSwitch";
 
 export const BustAWordEditor = () => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const notify = useNotification();
@@ -86,14 +80,20 @@ export const BustAWordEditor = () => {
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
-  const [getLesson] = useLazyGetLessonQuery();
+  const [getLesson, { isFetching: isLessonLoading = true }] = useLazyGetLessonQuery();
 
-  const [getLessons, { isLoading: isLessonsLoading }] = useLazyGetLessonsQuery();
+  const [getLessons, { isFetching: isLessonsLoading }] = useLazyGetLessonsQuery();
 
-  const { data: { data: level } = { data: { rows: [], count: 0 } } } = useGetLevelsQuery();
-
-  const { data: { data: unit } = { data: { rows: [], count: 0 } } } = useGetUnitsQuery();
-
+  const methods = useForm<FormType>({
+    defaultValues: {
+      unitId: 1,
+      levelId: "eng-preA1",
+      difficulty: LESSON_DIFFICULTY.EASY,
+      gameType: GAME_TYPE.BUST_A_WORD,
+      curriculum: null as any,
+      totalLines: 0,
+    },
+  });
   const {
     handleSubmit,
     register,
@@ -104,17 +104,9 @@ export const BustAWordEditor = () => {
     watch,
     control,
     formState: { errors },
-  } = useForm<FormType>({
-    defaultValues: {
-      unitId: 1,
-      levelId: "eng-preA1",
-      difficulty: LESSON_DIFFICULTY.EASY,
-      gameType: GAME_TYPE.BUST_A_WORD,
-      totalLines: 0,
-    },
-  });
+  } = methods;
 
-  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
     onDrop: async (acceptFiles) => {
       const data = await csvToJson<Curriculum>(acceptFiles[0]);
       const name = acceptFiles[0].name;
@@ -263,71 +255,16 @@ export const BustAWordEditor = () => {
   };
 
   return (
-    <React.Fragment>
-      <EditorScene>
-        <EditorScene.Left xs={2}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
-            <Controller
-              control={control}
-              name="levelId"
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <InputLabel size="small">Level</InputLabel>
-                  <Select label="Level" size="small" native disabled {...field}>
-                    {level.rows.map((level) => (
-                      <option key={level.id} value={level.id}>
-                        {level.name}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-            <Controller
-              control={control}
-              name="unitId"
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <InputLabel size="small">Unit</InputLabel>
-                  <Select label="Unit" size="small" native disabled {...field}>
-                    {unit.rows.map((unit) => (
-                      <option key={unit.id} value={unit.id}>
-                        {unit.name}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-            <Controller
-              control={control}
-              name="gameType"
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <InputLabel size="small">Lesson List</InputLabel>
-                  <Select
-                    label="Lesson list"
-                    size="small"
-                    native
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      const selectedValue = e.target.value as string;
-                      navigate(`/gms/${selectedValue.toLowerCase().replaceAll("_", "-")}`);
-                    }}
-                  >
-                    {Object.entries(GAME_TYPE).map(([key, value]) => (
-                      <option key={key} value={key}>
-                        {value}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-          </Box>
-        </EditorScene.Left>
-        <EditorScene.Mid xs={8}>
+    <BlurLoading isLoading={isLessonLoading}>
+      <FormProvider {...methods}>
+        <EditorScene1
+          isSaving={isLessonsLoading}
+          isPublising={isUpdating}
+          onNew={handleClear}
+          onSave={handleToggleConfirm}
+          onLoad={handleToggleLesson}
+          onPublish={handlePubic}
+        >
           <DndContext
             sensors={sensors}
             modifiers={[restrictToWindowEdges]}
@@ -455,55 +392,30 @@ export const BustAWordEditor = () => {
               <DragOverlay>{activeId ? <BoardRowDraggable id={activeId} assets={sphereAssets} /> : null}</DragOverlay>
             </Grid>
           </DndContext>
-        </EditorScene.Mid>
-        <EditorScene.Right xs={2}>
-          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <FormControl>
-                <InputLabel size="small">Difficulty</InputLabel>
-                <Select
-                  label="Difficulty"
-                  size="small"
-                  {...register("difficulty", { required: "This field is required", valueAsNumber: true })}
-                  native
-                >
-                  {Object.entries(LESSON_DIFFICULTY).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {key.toUpperCase()}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Button color="primary" variant="contained" onClick={handleClear}>
-                New
-              </Button>
-              <Button color="primary" variant="contained" onClick={handleToggleLesson}>
-                Load
-              </Button>
-              <Button color="primary" variant="contained" onClick={handleToggleConfirm} disabled={isLessonsLoading}>
-                Save
-              </Button>
-              <Button color="success" variant="contained" disabled={isUpdating} onClick={handlePubic}>
-                Publish
-              </Button>
-            </Box>
-          </Box>
-        </EditorScene.Right>
-      </EditorScene>
+        </EditorScene1>
+      </FormProvider>
+
       <LessonModal open={open} onClose={handleToggleLesson} onSelect={handleLessonSelect} />
+
       <Dialog open={openConfirm} onClose={handleToggleConfirm}>
         <DialogTitle>Confirm Save</DialogTitle>
         <DialogContent>
-          <TextField
-            size="small"
-            label="Name"
-            fullWidth
-            margin="dense"
-            error={!!errors.name}
-            helperText={errors.name ? errors.name.message : " "}
-            {...register("name", { required: "This field is required" })}
+          <Controller
+            control={control}
+            name="name"
+            rules={{ required: "This field is required" }}
+            render={({ field }) => (
+              <TextField
+                size="small"
+                label="Name"
+                fullWidth
+                margin="dense"
+                error={!!errors.name}
+                helperText={errors.name ? errors.name.message : " "}
+                InputLabelProps={{ shrink: true }}
+                {...field}
+              />
+            )}
           />
         </DialogContent>
         <DialogActions>
@@ -512,7 +424,7 @@ export const BustAWordEditor = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </React.Fragment>
+    </BlurLoading>
   );
 
   function handleDragStart(event: DragStartEvent) {
@@ -545,7 +457,7 @@ export const BustAWordEditor = () => {
   function transferMapToAssets(a: AssignmentsMap, b: AssetImage[]): Sphere[] {
     const output: Sphere[] = [];
     let count = 1;
-    
+
     for (const [key, value] of Object.entries(a)) {
       if (count > totalLines!) break;
       if (value === undefined) {
@@ -555,7 +467,7 @@ export const BustAWordEditor = () => {
       const [index] = key.split("-");
       const { name } = b[parseInt(index)];
 
-      output.push({ type: wordsArray[count-1] ? "W" : "E", name });
+      output.push({ type: wordsArray[count - 1] ? "W" : "E", name });
       count++;
     }
 
