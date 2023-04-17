@@ -47,7 +47,7 @@ import { ASSET_BUCKET, ASSET_FOLDER } from "gms/ultils/constants";
 import { csvToJson } from "gms/ultils/file";
 import { AssetImage } from "gms/ultils/types";
 import { isNil } from "lodash";
-import { useMemo, useState } from "react";
+import { ChangeEvent, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Controller, FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { assignSphere, removeAllSphere, removeSphere, selectAllAssignedSpheres } from "./bustAWordSlice";
@@ -258,6 +258,11 @@ export const BustAWordEditor = () => {
     }
   };
 
+  const handleTotalLinesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(0, Math.min(6, parseInt(e.target.value)));
+    setValue("totalLines", value, { shouldValidate: true });
+  };
+
   return (
     <BlurLoading isLoading={isLessonLoading}>
       <FormProvider {...methods}>
@@ -285,8 +290,9 @@ export const BustAWordEditor = () => {
                     label="Total Lines"
                     fullWidth
                     type="number"
-                    inputProps={{ min: 0, max: 6 }}
-                    {...register("totalLines", { valueAsNumber: true })}
+                    inputProps={{ min: 0, max: 6, step: 1 }}
+                    {...register("totalLines", { valueAsNumber: true, min: 0, max: 6 })}
+                    onChange={handleTotalLinesChange}
                   />
                   <FormGroup>
                     {wordsArray.map((w, i) => (
