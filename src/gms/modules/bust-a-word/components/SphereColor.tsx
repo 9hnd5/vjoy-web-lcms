@@ -11,7 +11,7 @@ const ImageContainer = styled("div")(() => ({
   border: `solid 3px ${blueGrey[300]}`,
   borderRadius: "4px",
   marginBottom: "10px",
-  overflow: "scroll",
+  overflowX: "scroll",
   padding: "5px 0",
 }));
 
