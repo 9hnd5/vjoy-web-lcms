@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import { blueGrey, lightBlue } from "@mui/material/colors";
 import { BlurLoading } from "gms/components/BlurLoading";
-import { EditorScene1 } from "gms/components/EditorScene1";
+import { EditorScene } from "gms/components/EditorScene";
 import LoadingComponent from "gms/components/LoadingComponent";
 import { useAppDispatch } from "gms/hooks/useAppDispatch";
 import { useAppSelector } from "gms/hooks/useAppSelector";
@@ -254,7 +254,7 @@ export const WordBalloonEditor = () => {
   return (
     <BlurLoading isLoading={isLessonLoading}>
       <FormProvider {...methods}>
-        <EditorScene1
+        <EditorScene
           isSaving={isLessonsLoading}
           isPublising={isUpdating}
           onNew={handleClear}
@@ -383,7 +383,7 @@ export const WordBalloonEditor = () => {
               <DragOverlay>{activeId ? <BalloonDraggable id={activeId} assets={balloonAssets} /> : null}</DragOverlay>
             </Grid>
           </DndContext>
-        </EditorScene1>
+        </EditorScene>
       </FormProvider>
 
       <LessonModal open={open} onClose={handleToggleLesson} onSelect={handleLessonSelect} />
