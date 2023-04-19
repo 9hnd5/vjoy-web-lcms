@@ -126,13 +126,14 @@ export const BustAWordEditor = () => {
   const wordArray = watch("wordArray");
   useMemo(() => {
     const numWords = fields.length;
-    if (totalLines > numWords) {
-      const numToAdd = totalLines - numWords;
+    const lines = isNil(totalLines) || isNaN(totalLines) ? 0 : totalLines;
+    if (lines > numWords) {
+      const numToAdd = lines - numWords;
       for (let i = 0; i < numToAdd; i++) {
         append({ value: false });
       }
-    } else if (totalLines < numWords) {
-      for (let i = numWords - 1; i >= totalLines; i--) {
+    } else if (lines < numWords) {
+      for (let i = numWords - 1; i >= lines; i--) {
         remove(i);
       }
     }
