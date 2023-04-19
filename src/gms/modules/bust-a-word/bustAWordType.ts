@@ -14,7 +14,10 @@ export type FormType = {
   behavior: number;
   asset: BustAWordAsset;
   levelId: string;
-  totalLines?: number;
+  totalLines: number;
+  wordArray: {
+    value: boolean;
+  }[];
 };
 
 export type AssignmentsMap = { [key: string]: string | undefined };

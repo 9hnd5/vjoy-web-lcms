@@ -49,7 +49,7 @@ import { AssetImage } from "gms/ultils/types";
 import { isNil } from "lodash";
 import { ChangeEvent, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Controller, FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { assignSphere, removeAllSphere, removeSphere, selectAllAssignedSpheres } from "./bustAWordSlice";
 import { AssignmentsMap, FormType } from "./bustAWordType";
 import { Board } from "./components/Board";
@@ -69,7 +69,6 @@ export const BustAWordEditor = () => {
   });
   const [selectedBackground, setSelectedBackground] = useState<AssetImage>();
   const [selectedCannon, setSelectedCannon] = useState<AssetImage>();
-  const [wordsArray, setWordsArray] = useState<boolean[]>([]);
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const assignmentsMap = useAppSelector(selectAllAssignedSpheres);
@@ -106,6 +105,11 @@ export const BustAWordEditor = () => {
     formState: { errors },
   } = methods;
 
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "wordArray",
+  });
+
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: async (acceptFiles) => {
       const data = await csvToJson<Curriculum>(acceptFiles[0]);
@@ -119,18 +123,20 @@ export const BustAWordEditor = () => {
 
   const curriculum = watch("curriculum");
   const totalLines = watch("totalLines");
+  const wordArray = watch("wordArray");
   useMemo(() => {
-    const lines = totalLines ?? 0;
-    let words = wordsArray;
-    if (lines > wordsArray.length) {
-      const numToAdd = lines - wordsArray.length;
-      const newElements = Array.from({ length: numToAdd }, () => false);
-      words = [...wordsArray, ...newElements];
-    } else if (lines < wordsArray.length) {
-      words = wordsArray.slice(0, lines);
+    const numWords = fields.length;
+    if (totalLines > numWords) {
+      const numToAdd = totalLines - numWords;
+      for (let i = 0; i < numToAdd; i++) {
+        append({ value: false });
+      }
+    } else if (totalLines < numWords) {
+      for (let i = numWords - 1; i >= totalLines; i--) {
+        remove(i);
+      }
     }
-    setWordsArray(words);
-  }, [totalLines, wordsArray]);
+  }, [totalLines, fields, append, remove]);
 
   const [createLesson, { isLoading: isCreating }] = useCreateLessonMutation();
 
@@ -162,9 +168,9 @@ export const BustAWordEditor = () => {
       bundleUrl: "https://storage.googleapis.com/vjoy-game-asset-dev/.unity_bundle",
     };
 
-    delete formData.totalLines;
+    const { totalLines, wordArray, ...rest } = formData;
     const data = {
-      ...formData,
+      ...rest,
       asset,
     };
 
@@ -220,19 +226,17 @@ export const BustAWordEditor = () => {
         name: lesson.name,
         unitId: lesson.unitId,
         totalLines: asset.spheres.length,
+        wordArray: asset.spheres.map((sphere) => ({ value: sphere.type === "W" })),
       },
       { keepDefaultValues: true }
     );
 
     dispatch(removeAllSphere());
 
-    const wordArr: boolean[] = [];
     asset.spheres.forEach((bubble, indexCount) => {
       const indexName = sphereAssets.findIndex((x) => x.name === bubble.name);
       dispatch(assignSphere({ sphereId: `${indexName}-${indexCount}-}`, boardId: indexCount.toString() }));
-      wordArr.push(bubble.type === "W");
     });
-    setWordsArray(wordArr);
 
     const backgroud = backgroundAssets.find((x) => x.name === lesson.asset.bg);
     setSelectedBackground(backgroud);
@@ -254,7 +258,6 @@ export const BustAWordEditor = () => {
       dispatch(removeAllSphere());
       setSelectedBackground(backgroundAssets[0]);
       setSelectedCannon(cannonAssets[0]);
-      setWordsArray([]);
     }
   };
 
@@ -295,14 +298,13 @@ export const BustAWordEditor = () => {
                     onChange={handleTotalLinesChange}
                   />
                   <FormGroup>
-                    {wordsArray.map((w, i) => (
+                    {fields.map((item, idx) => (
                       <WordSwitch
-                        key={i}
-                        checked={w}
-                        index={i}
-                        onChange={(index, value) =>
-                          setWordsArray((prev) => [...prev.slice(0, index), value, ...prev.slice(index + 1)])
-                        }
+                        key={item.id}
+                        checked={item.value}
+                        onChange={(value) => {
+                          update(idx, { value });
+                        }}
                       />
                     ))}
                   </FormGroup>
@@ -325,8 +327,8 @@ export const BustAWordEditor = () => {
                       left="5%"
                       zIndex="999"
                       assets={sphereAssets}
-                      rows={totalLines ?? 0}
-                      words={wordsArray}
+                      rows={totalLines}
+                      words={wordArray}
                     />
                     {assets && (
                       <>
@@ -469,7 +471,7 @@ export const BustAWordEditor = () => {
     let count = 1;
 
     for (const [key, value] of Object.entries(a)) {
-      if (count > totalLines!) break;
+      if (count > totalLines) break;
       if (value === undefined) {
         continue;
       }
@@ -477,7 +479,7 @@ export const BustAWordEditor = () => {
       const [index] = key.split("-");
       const { name } = b[parseInt(index)];
 
-      output.push({ type: wordsArray[count - 1] ? "W" : "E", name });
+      output.push({ type: wordArray[count - 1].value ? "W" : "E", name });
       count++;
     }
 

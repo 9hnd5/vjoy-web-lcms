@@ -17,7 +17,7 @@ const StyledBox = styled(Box)(() => ({
 type BoardRowProps = {
   id: number;
   assets: AssetImage[];
-  words: boolean[];
+  words: { value: boolean }[];
 };
 
 export const BoardRow = ({ id, words, assets }: BoardRowProps) => {
@@ -32,7 +32,7 @@ export const BoardRow = ({ id, words, assets }: BoardRowProps) => {
 
   return (
     <StyledBox bgcolor="transparent" ref={setNodeRef} sx={sx}>
-      {sphereId && <BoardRowDraggable id={`${sphereId}`} assets={assets} word={words[id]} />}
+      {sphereId && <BoardRowDraggable id={`${sphereId}`} assets={assets} word={words[id].value} />}
     </StyledBox>
   );
 };
