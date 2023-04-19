@@ -35,10 +35,14 @@ const StyledSwitch = styled(Switch)(({ theme }) => ({
 
 type WordSwitchProps = {
   checked: boolean;
-  index: number;
-  onChange: (index: number, value: boolean) => void;
+  onChange: (value: boolean) => void;
 };
 
-export const WordSwitch = ({ checked, index, onChange }: WordSwitchProps) => {
-  return <FormControlLabel control={<StyledSwitch checked={checked} onChange={(e) => onChange(index, e.target.checked)} />} label={checked ? "Word" : "Empty"} />;
+export const WordSwitch = ({ checked, onChange }: WordSwitchProps) => {
+  return (
+    <FormControlLabel
+      control={<StyledSwitch checked={checked} onChange={(e) => onChange(e.target.checked)} />}
+      label={checked ? "Word" : "Empty"}
+    />
+  );
 };

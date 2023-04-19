@@ -5,7 +5,7 @@ import { BoardRow } from "./BoardRow";
 
 interface BoardProps extends BoxProps {
   assets: AssetImage[];
-  words: boolean[];
+  words: { value: boolean }[];
   rows: number;
 }
 
